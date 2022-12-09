@@ -1,19 +1,21 @@
 // import axios from "axios"
 
-document.getElementById("open").addEventListener("click",()=>{openForm(),howl()})
-document.getElementById("close").addEventListener("click",()=>{closeForm()})
+// move to controller? 
+// also remember comments please
+document.getElementById("open").addEventListener("click", () => { openForm(), howl(); });
+document.getElementById("close").addEventListener("click", () => { closeForm(); });
 
-function openForm() {
+function openForm () {
   document.getElementById("myForm").style.display = "block";
 }
 
-function closeForm() {
+function closeForm () {
   document.getElementById("myForm").style.display = "none";
 }
 
-function howl() {
+function howl () {
   var audio = new Audio('../assets/audio/Chewbacca_Sound_6.mp3');
-  audio.volume = 0.17
+  audio.volume = 0.17;
   audio.play();
 }
 
@@ -65,7 +67,7 @@ function howl() {
 // let id = await sendy()
 // await getStuff(id)
 
-export {openForm,closeForm,howl}
+export { openForm, closeForm, howl }
 
 
 
