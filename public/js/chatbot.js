@@ -72,8 +72,10 @@ const FAQoutput = [
 
 FAQoutput.forEach((question, i) => {  
     console.log(`- case #`, i +1, '-');
+    console.log(``);
     console.log(`User: ${question}`);
     console.log(`---`);
+    console.log(``);
     console.log(`FAQ: 
         ${outputFAQ(question, FAQ)}`);
     console.log(`-- end case --`);
