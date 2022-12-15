@@ -37,7 +37,7 @@ BOT: Thank you for contacting support, your ticked has been marked as resolved.
 *Ticket Closed*
 */
 
-// created a script execution keyword called 'run' to execute chatbot.js directly (npm run)
+// created a script execution keyword execute chatbot.js directly (npm run faq)
 // I am using this block to test the FAQ function
 import { outputFAQ } from './outputFAQ.js';
 
@@ -77,6 +77,7 @@ FAQoutput.forEach(question => {
     }
 
     console.log(`User: ${question}`);
+    console.log(`---`);
     console.log(`BOT: ${outputFAQ(obj)}`);
 })
 
