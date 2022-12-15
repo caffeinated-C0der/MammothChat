@@ -6,10 +6,11 @@
   "main": "index.js",
   "scripts": {
     "start": "node ./src/server.cjs",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "run": "./public/js/chatbot.js"
   },
   "repository": {
-    "type": "git",
+    "type": "git", 
     "url": "git+https://github.com/christian-morgan92/MammothChat.git"
   },
   "author": "",
