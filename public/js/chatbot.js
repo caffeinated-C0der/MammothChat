@@ -70,15 +70,14 @@ const FAQoutput = [
     'How do I install a vm onto my computer'
 ];
 
-FAQoutput.forEach(question => {
-    const obj = {
-        userText: question,
-        FAQ
-    }
-
+FAQoutput.forEach((question, i) => {  
+    console.log(`- case #`, i +1, '-');
     console.log(`User: ${question}`);
     console.log(`---`);
-    console.log(`BOT: ${outputFAQ(obj)}`);
+    console.log(`FAQ: 
+        ${outputFAQ(question, FAQ)}`);
+    console.log(`-- end case --`);
+    console.log(``);
 })
 
 console.log(``);
