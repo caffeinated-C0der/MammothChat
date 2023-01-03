@@ -1,7 +1,7 @@
 // warning this file is a bit messy, still need to clean previous drafts
 
 const blacklistKeywords = [
-        'to', 'the', 'like', 'do', 'that', 'is', 'can', 'i', 'am', 'a', 'how', 'my', 'me'
+        'to', 'the', 'like', 'do', 'that', 'is', 'can', 'i', 'am', 'a', 'how', 'my', 'me'//, 'need', 
     ]; // keywords that doesn't contribute to the filter like "to, the, like, do, that", etc
 
 const punctuationArr = [ 
