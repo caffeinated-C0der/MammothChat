@@ -1,6 +1,6 @@
-// import everything then execute 😅
+// user story // sortoff
 
-// output sample/ expected output or execution/ user story
+// output sample/ expected output or execution
 /*
 *${user} enters chat*
 BOT: Greetings fleshy lump how may we help you? You may use the command "!resolve" at any time to mark your ticket as resolved.
@@ -42,22 +42,17 @@ BOT: Thank you for contacting support, your ticked has been marked as resolved.
 import { outputFAQ } from './outputFAQ.js';
 
 console.log(``);
-console.log(`>>>>> Louis debugging -------------- FAQ --------------`);
+console.log(`-------------- FAQ --------------`);
 console.log(``);
 
+// junk data - meant to be humorous
 const FAQ = [
-    `Q: can't log into service now?
-        A: Grow a pair`,
-    `Q: Why do I need a password?
-        A: I mean if you're that dumb...`,
-    `Q: To login to the services the first time.
-        A: The password will be your credit card number, remember to change it`,
-    `Q: Need help?
-        A: how much are you willing to pay?`,
-    `Q: Security won't let me park inside.
-        A: because I told them to stop idiots like you from taking my parking spot`,
-    `Q: why do i need to install a virtual machine
-        A: because cross platform support is a bit janky without a vm`
+    `Q: can't log into service now?\nA: Grow a pair`,
+    `Q: Why do I need a password?\nA: I mean if you're that dumb...`,
+    `Q: To login to the services the first time.\nA: The password will be your credit card number, remember to change it`,
+    `Q: Do you require assistance?\nA: how much are you willing to pay?`,
+    `Q: Security won't let me park inside.\nA: because I told them to stop idiots like you from taking my parking spot`,
+    `Q: why do i need to install a virtual machine\nA: because cross platform support is a bit janky without a vm`
 ];
 
 const FAQoutput = [
@@ -71,14 +66,21 @@ const FAQoutput = [
 ];
 
 FAQoutput.forEach((question, i) => {  
-    console.log(`- case #`, i +1, '-');
-    console.log(``);
+    console.log(`- testing case #`, i +1, '-');
+    // console.log(``);
     console.log(`User: ${question}`);
     console.log(`---`);
-    console.log(``);
-    console.log(`FAQ: 
-        ${outputFAQ(question, FAQ)}`);
-    console.log(`-- end case --`);
+    // console.log(``);
+    // console.log(`FAQ: ${outputFAQ(question, FAQ)}`);
+    let output = 'ERROR';
+    try { // just to catch unforseen errors
+        console.log(`FAQ Trace:`);
+        output = outputFAQ(question, FAQ);
+    } catch (error) {
+        console.error(`FAQ failed`, error);
+    } 
+    console.log(`Result:\n${output}`);
+    console.log(`-- end case #`, i +1, '--');
     console.log(``);
 })
 
@@ -86,4 +88,4 @@ console.log(``);
 console.log(`========================= END =========================`);
 console.log(``);
 
-// todo write a function to handle all !commands (abstraction)
+// todo write a class to handle all !commands (abstraction)
