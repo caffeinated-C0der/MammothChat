@@ -46,7 +46,7 @@ console.log(`-------------- FAQ --------------`);
 console.log(``);
 
 // junk data - meant to be humorous
-const FAQ = [
+const faqInputArray = [
     `Q: can't log into service now?\nA: Grow a pair`,
     `Q: Why do I need a password?\nA: I mean if you're that dumb...`,
     `Q: To login to the services the first time.\nA: The password will be your credit card number, remember to change it`,
@@ -55,7 +55,7 @@ const FAQ = [
     `Q: why do i need to install a virtual machine\nA: because cross platform support is a bit janky without a vm`
 ];
 
-const FAQoutput = [
+const userMessages = [
     'I am struggling to login to the website',
     "The webpage doesn't allow me to login",
     'How do I reset my password?',
@@ -65,7 +65,9 @@ const FAQoutput = [
     'How do I install a vm onto my computer'
 ];
 
-FAQoutput.forEach((question, i) => {  
+// very DRY, I dont care
+if (false) { // bulk
+    userMessages.forEach((question, i) => {  
     console.log(`- testing case #`, i +1, '-');
     // console.log(``);
     console.log(`User: ${question}`);
@@ -75,17 +77,36 @@ FAQoutput.forEach((question, i) => {
     let output = 'ERROR';
     try { // just to catch unforseen errors
         console.log(`FAQ Trace:`);
-        output = outputFAQ(question, FAQ);
+        output = outputFAQ(question, faqInputArray);
     } catch (error) {
         console.error(`FAQ failed`, error);
     } 
     console.log(`Result:\n${output}`);
     console.log(`-- end case #`, i +1, '--');
     console.log(``);
-})
+})} else { // single
+    const [question] = userMessages.slice(-1);
+    console.log(`- testing case #`, userMessages.length -1, '-');
+    // console.log(``);
+    console.log(`User: ${question}`);
+    console.log(`---`);
+    // console.log(``);
+    // console.log(`FAQ: ${outputFAQ(question, FAQ)}`);
+    try { // just to catch unforseen errors
+        console.log(`FAQ Trace:`);
+        const output = outputFAQ(question, faqInputArray);
+        console.log(`Result:\n${output}`);
+    } catch (error) {
+        console.warn(` === FAQ failed === `);
+        console.error(error);
+        console.log(``);
+    } 
+    console.log(`-- end case #`, userMessages.length -1, '--');
+    console.log(``);
+}
 
 console.log(``);
 console.log(`========================= END =========================`);
 console.log(``);
 
-// todo write a class to handle all !commands (abstraction)
+// idea write a class to handle all !commands (abstraction)

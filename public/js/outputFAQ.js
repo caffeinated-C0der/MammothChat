@@ -31,8 +31,6 @@ const removeFalsePositives = function(strArr = [''], keywordsToRemove = ['']) {
 const nonStrictComparison = function (
         FAQ = [], // FROZEN FAQ is an array of words 
         MSG = [], // array of words 
-        // matchArr = [], // MUTATE array of matched keywords 
-        // output = [], // MUTATE array of indexes 
         settings = { bool: true, consecutive: 3 } // be very careful with this variable
 ) {
     const   faq = [...FAQ] // array of char ['Q',  ' ', 'w', 'h', 'y', ' ', 'd', 'o', ' ', 'i']
@@ -73,7 +71,7 @@ const filterFAQ = function (userInputArr, FAQarr, strict = { bool: false, consec
 
     // store array of index rather than filter array to preserve original copy
     // and allow a new array to be filtered by the index rather than the content
-    const output = [], matched = []; 
+    const outputIndexArray = [], matchedKeywordsArray = []; 
     let faqWithSpaces;
     // const allMatches = [];
 
@@ -85,46 +83,70 @@ const filterFAQ = function (userInputArr, FAQarr, strict = { bool: false, consec
             .filter (el => el != '' && el != ' ') // ['Q', 'this', 'A', 'that'] // remove spaces       
         })
         .map ((faq, i, ar) => { // faq is an array of words
-            let x = 0, found = false, debug;
             Object.freeze(faq); // frozen just incase 
 
             // guard clause format rather than another layer of nesting
             // non strict comparison
-            // todo need store index i // refactor // matched.push(  )
-            if (nonStrictComparison) {
+            if (!strict.bool) {
                 const temp = [...nonStrictComparison(faqWithSpaces, txt, strict)];
 
-                if (temp.length >! 0) return faq;  // not match found
-                // else match found
-
-                output.push(i);
-                matched.push( ...temp );
-                
-                return faq;
-            }; // else
-
-            // strict comparison
-            while (x < faq.length) { // try to refactor this
-                if (txt.find (el => {  // word
-                        // .debug = [el, faq[x]];
-                        debug = el;
-                        return el.toLowerCase() == faq[x].toLowerCase();
-                    })) {
-                    output.push(i);
-                    found = true;
-
-                    matched.push(debug); // only push if found
+                if (temp.length > 0) {  // match found
+                    outputIndexArray.push(i);
+                    matchedKeywordsArray.push( ...temp );
                 }
-                x++;
-            }
+                
+                return faq; // remember to return with map
+            }; // else strict comparison
+
+            // let x = 0, found = false, debug;
+            // strict comparison
+            // while (x < faq.length) { // try to refactor this
+            //     if (txt.find (el => {  // word
+            //             // .debug = [el, faq[x]];
+            // !            debug = el;
+            //             return el.toLowerCase() == faq[x].toLowerCase();
+            //         })) {
+            //         outputIndexArray.push(i);
+            //         found = true;
+
+            //         matchedKeywordsArray.push(debug); // only push if found
+            //     }
+            //     x++;
+            // }
+
+            // just for testing
+            // if (i == ar.length - 1) {
+            //     console.log(` >>> this is what I have to work with <<< `);
+            //     console.log(`faq (slice 5):`, faq.slice(0,5));
+            //     console.log(`txt:`, txt);
+            //     console.log(`index:`, i);
+            // }
+
+            txt.forEach( userKeyword => { // [ 'install', 'vm', 'onto', 'computer' ]
+                let index;
+                const findKeyword = faq.find( (faqKeyword, i) => {
+                    index = i;
+                    return faqKeyword.toLowerCase() == userKeyword.toLowerCase();
+                } ); // returns true or undefined
+
+                // if keyword not found exit else store result
+                if (!findKeyword) return; // if undefined return
+
+                outputIndexArray.push(index);
+                matchedKeywordsArray.push(userKeyword);
+            });
 
             return faq; // remember to return with map
-        }); 
+        }); // end FAQ.map();
+    
+        console.log(`>>>>>>>>>>>>> results >>>>>>>>>>>>>`);
+        console.log(`index array:`, outputIndexArray); // fixme
+        console.log(`keywords array:`, matchedKeywordsArray);
         
     // tracing exists in order to add more works to the filter
     // this is a manual process but with some time most keywords will be relevant
     if (trace.bool) {
-        console.log(`   ${!strict.bool? 'STRICT MATCH' : 'PARTIAL MATCH'}:`, (matched.length > 0) ? [ ...new Set(matched)] : 'none');
+        console.log(`   ${strict.bool? 'STRICT MATCH' : 'PARTIAL MATCH'}:`, (matchedKeywordsArray.length > 0) ? [ ...new Set(matchedKeywordsArray)] : 'none');
     }
 
     console.log(`   ----------------`);
@@ -132,7 +154,7 @@ const filterFAQ = function (userInputArr, FAQarr, strict = { bool: false, consec
     // array of indexes that had a keyword match
     // set eliminates any possible duplicates
     // set needs to be spread because it's an object not an array
-    return [ ...new Set(output) ]; // fixme somehow outputs all entries
+    return [ ...new Set(outputIndexArray) ]; // fixme somehow outputs all entries
 }
 
 // consider moving main function to the top of the scope - functions are hoisted
@@ -167,35 +189,39 @@ const outputFAQ = function (
     const FAQ = [...FAQquestions]; // copy
     const filteredFAQ = []; 
 
-    // guard clause for the !abort command // delete !abort? 
-    if (text.toLowerCase() == '!abort' || // testing user text [strict]
-        text.toLowerCase().split(' ').find(txt => txt == '!abort') || // testing user text [semi-strict]
-        FAQ[0].toLowerCase() == '!abort' || // testing first index of FAQ
-        FAQ[0][0].toLowerCase() == '!abort' || // testing first index of an array within FAQ array
-        FAQ[0][1].toLowerCase() == '!abort' // testing second index of an array within FAQ array
-    ) return '*FAQ aborted*'; // if the user sends '!abort' through this function they will stop the FAQ
-    // instead of throwing an error the expected result which is string is returned
+    {
+    // idea this is just an idea could just delete
+    // // guard clause for the !abort command // delete !abort? 
+    // if (text.toLowerCase() == '!abort' || // testing user text [strict]
+    //     text.toLowerCase().split(' ').find(txt => txt == '!abort') || // testing user text [semi-strict]
+    //     FAQ[0].toLowerCase() == '!abort' || // testing first index of FAQ
+    //     FAQ[0][0].toLowerCase() == '!abort' || // testing first index of an array within FAQ array
+    //     FAQ[0][1].toLowerCase() == '!abort' // testing second index of an array within FAQ array
+    // ) return '*FAQ aborted*'; // if the user sends '!abort' through this function they will stop the FAQ
+    // // instead of throwing an error the expected result which is string is returned
+    }
 
     // if there is something to replace then replace it
     // accepts str returns str
     if (punctuationToReplace.length > 0 ) text = replaceByArray(text, punctuationToReplace, punctuationReplaceChar);
-        // {punctuationToReplace.forEach (char => text.replaceAll(`${char}`, `${punctuationReplaceChar}`))};
 
     text = text.split(' '); // makes string an array
 
     // accepts array returns array
     if (wordsToIgnore.length > 0) text = removeFalsePositives(text, wordsToIgnore);
     
-    // get index for filtering the FAQ
-    const index = filterFAQ(text, FAQ, {bool: strictFilter, consecutive: consecutiveMatch}, {bool: true}); // array of indexes
+    // get index for filtering the FAQ // array of indexes
+    const indexArray = filterFAQ(text, FAQ, {bool: strictFilter, consecutive: consecutiveMatch}, {bool: true}); 
 
-    index.forEach(index => {
+    indexArray.forEach(index => {
         filteredFAQ.push(FAQ[index]);
     });
 
     console.log(`   Total Matches :`, [ ...new Set(filteredFAQ)].length);
     console.log(``);
 
+    // set is similar to an array except it cant hold duplicates and is an object not array
+    // by spreading the set object '...' it can be converted into an array format
     return ( filteredFAQ.length > 0 ) ? [ ...new Set(filteredFAQ)].join('\n') : 'I failed to compile any FAQ related to your problem.'; // string
 }
 
