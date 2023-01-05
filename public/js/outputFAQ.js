@@ -23,19 +23,18 @@ const removeFalsePositives = function(strArr = [''], keywordsToRemove = ['']) {
     return filteredArr; // return new array rather than mutating parameter
 }
 
-// Mutative function. Instead of returning a result and not mutating parameters this function
-// will mutate some of the parameters and then return the unmutated version of the first parameter
-// I repeat, DONT mutate the first parameter
-// todo refactor object settings from parameter to avoid accidental parameter deletion 
-// todo return boolean instead of FAQ
+// idea return object instead of values
+// dont mutate parameters
+// Partial string comparison by comparing a certain amount of character instead of the whole word
+// compares from the start of the word up to the consecutive length for both sets of keywords
 const nonStrictComparison = function (
         FAQ = [], // FROZEN FAQ is an array of words 
         MSG = [], // array of words 
-        settings = { bool: true, consecutive: 3 } // be very careful with this variable
+        settings = { bool: true, consecutive: 3 } // be very careful with this variable // todo fix all object parameters
 ) {
+    // .map((val, i, arr) => {if (!i) {console.log(`array:`, arr);}; return val}) // use this to see data  
     const   faq = [...FAQ] // array of char ['Q',  ' ', 'w', 'h', 'y', ' ', 'd', 'o', ' ', 'i']
-                        // .map((val, i, arr) => {if (!i) {console.log(`array:`, arr);}; return val}) // use this to see data  
-                        .join('').split(' ') // ['Q', 'why','do','i','need',o','install','a','virtual','machine, etc]
+                        .join('').split(' ') // ['Q', 'why','do','i','need',o','install','a', etc]
                         // remove everything smaller than consecutive length
                         .filter( (word) => !(word.length < settings.consecutive) ), // ['why','need', 'install','virtual','machine, etc]
             msg = [...MSG] // [ 'install', 'vm', 'onto', 'computer' ]
@@ -57,7 +56,7 @@ const nonStrictComparison = function (
         } );
     } );
 
-    // maybe return an object? object in object out
+    // idea maybe return an object? object in object out
     return match; 
 }
 
@@ -73,7 +72,6 @@ const filterFAQ = function (userInputArr, FAQarr, strict = { bool: false, consec
     // and allow a new array to be filtered by the index rather than the content
     const outputIndexArray = [], matchedKeywordsArray = []; 
     let faqWithSpaces;
-    // const allMatches = [];
 
     FAQ // ['Q: this. A: that.'] 
         .map (sentence => {
@@ -97,30 +95,6 @@ const filterFAQ = function (userInputArr, FAQarr, strict = { bool: false, consec
                 
                 return faq; // remember to return with map
             }; // else strict comparison
-
-            // let x = 0, found = false, debug;
-            // strict comparison
-            // while (x < faq.length) { // try to refactor this
-            //     if (txt.find (el => {  // word
-            //             // .debug = [el, faq[x]];
-            // !            debug = el;
-            //             return el.toLowerCase() == faq[x].toLowerCase();
-            //         })) {
-            //         outputIndexArray.push(i);
-            //         found = true;
-
-            //         matchedKeywordsArray.push(debug); // only push if found
-            //     }
-            //     x++;
-            // }
-
-            // just for testing
-            // if (i == ar.length - 1) {
-            //     console.log(` >>> this is what I have to work with <<< `);
-            //     console.log(`faq (slice 5):`, faq.slice(0,5));
-            //     console.log(`txt:`, txt);
-            //     console.log(`index:`, i);
-            // }
 
             txt.forEach( userKeyword => { // [ 'install', 'vm', 'onto', 'computer' ]
                 let index;
@@ -159,20 +133,17 @@ const filterFAQ = function (userInputArr, FAQarr, strict = { bool: false, consec
 
 // consider moving main function to the top of the scope - functions are hoisted
 // this function will construct the FAQ output message for the chat
-// instead of the normal way of declaring parameters the function accepts an object of settings
+// instead of the normal way of declaring parameters the function accepts an object of settings // wip
     // this allows the programer to choose which paramters they wish to declare
     // and in what order, this also makes it easier to add additional parameters later
     // without having to make major changes elsewhere in the code
     // and if you do it wont affect the rest of the app (if done within reason)
 // using defaults to specify expected data types
-// some of the default values act as commands to abort certain actions
-    // that might otherwise result in an error 
-// note that partial comparison might result in a more intensive comparison (performance wise) 
 const outputFAQ = function (
     userTxt = `!abort`, // clean user message string (can be multi-lined)
     FAQquestions = [`!abort`], // array of FAQ current testing format ['Q: this. /n A: that.'] 
     // unforseen error: when trying to alter one or more keywords in settings you overwrite the entire object, deleting the other defaults
-    settings = { // be careful when overwriting this // refactor 
+    settings = { // be careful when overwriting this // refactor  // fixme
         wordsToIgnore: blacklistKeywords, // common words that result in a false positive when comparing
         punctuationToReplace: punctuationArr, // array of punctuation to replace with '' when comparing string
         punctuationReplaceChar: '', // character to replace punctuation
@@ -188,18 +159,6 @@ const outputFAQ = function (
     let text = userTxt.slice(0); // make a copy
     const FAQ = [...FAQquestions]; // copy
     const filteredFAQ = []; 
-
-    {
-    // idea this is just an idea could just delete
-    // // guard clause for the !abort command // delete !abort? 
-    // if (text.toLowerCase() == '!abort' || // testing user text [strict]
-    //     text.toLowerCase().split(' ').find(txt => txt == '!abort') || // testing user text [semi-strict]
-    //     FAQ[0].toLowerCase() == '!abort' || // testing first index of FAQ
-    //     FAQ[0][0].toLowerCase() == '!abort' || // testing first index of an array within FAQ array
-    //     FAQ[0][1].toLowerCase() == '!abort' // testing second index of an array within FAQ array
-    // ) return '*FAQ aborted*'; // if the user sends '!abort' through this function they will stop the FAQ
-    // // instead of throwing an error the expected result which is string is returned
-    }
 
     // if there is something to replace then replace it
     // accepts str returns str
@@ -226,7 +185,5 @@ const outputFAQ = function (
 }
 
 export { outputFAQ }; 
-
-// review keep or discard the command option/ idea 
 
 // refactor change some arrays to sets to eliminate duplication 

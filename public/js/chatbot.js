@@ -69,11 +69,8 @@ const userMessages = [
 if (false) { // bulk
     userMessages.forEach((question, i) => {  
     console.log(`- testing case #`, i +1, '-');
-    // console.log(``);
     console.log(`User: ${question}`);
     console.log(`---`);
-    // console.log(``);
-    // console.log(`FAQ: ${outputFAQ(question, FAQ)}`);
     let output = 'ERROR';
     try { // just to catch unforseen errors
         console.log(`FAQ Trace:`);
@@ -87,11 +84,8 @@ if (false) { // bulk
 })} else { // single
     const [question] = userMessages.slice(-1);
     console.log(`- testing case #`, userMessages.length -1, '-');
-    // console.log(``);
     console.log(`User: ${question}`);
     console.log(`---`);
-    // console.log(``);
-    // console.log(`FAQ: ${outputFAQ(question, FAQ)}`);
     try { // just to catch unforseen errors
         console.log(`FAQ Trace:`);
         const output = outputFAQ(question, faqInputArray);
@@ -109,4 +103,4 @@ console.log(``);
 console.log(`========================= END =========================`);
 console.log(``);
 
-// idea write a class to handle all !commands (abstraction)
+// idea !commands?
