@@ -2,16 +2,6 @@
 // different level of abstraction to avoid altering the FAQ function
 import { blacklistKeywords, punctuationArr } from "./settings.js"; 
 
-// const blacklistKeywords = [
-//         'to', 'the', 'like', 'do', 'that', 'is', 'can', 'i', 'am', 'a', 'how', 'my', 'me'//, 'need', 
-//     ]; // keywords that doesn't contribute to the filter like "to, the, like, do, that", etc
-
-// const punctuationArr = [ 
-//     '!', '"', '#', '$', '%', '&', "'", '(', ')', '*', '+', ',', 
-//     '-', '.', '/', ':', ';', '?', '@', '[', ']', '^', '_', 
-//     '{', '|', '}', '~' ]; // does not include backtilt and backslash as those don't like being in strings
-//     // might need to try using other methods to include those into strings for comparison
-
 // replace characters function
 const replaceByArray = function (text = '', punctuationArray = [ ...punctuationArr ], replacementChar = ' ') {
     let output = text.slice(0); // dont mutate parameters // replaceAll doesn't mutate it returns new str
@@ -44,109 +34,15 @@ const nonStrictComparison = function (
         // matchArr = [], // MUTATE array of matched keywords 
         // output = [], // MUTATE array of indexes 
         settings = { bool: true, consecutive: 3 } // be very careful with this variable
-        ) {
-            // delete logic unused
-    // split string into array of char
-    // itterate through keywords
-    // then compare until a match
-    // then increase match counter
-    // compare next char
-    // if match increase counter until match counter == consecutive or not matching anymore
-    // repeat until end of array - consecutive
-    // if match mutate matchArr and output
-    // let isValid = true, skipCounter = 0;
-    // this way we can still output which keyword triggered a match through index of word
-    // but also allow us to partial match whole words rather than parts of multiple words
-    // faq contains spaces while msg is an array with char arrays for each word
-    // msg contains mainly keywords and will be used for comparison
-
-
+) {
     const   faq = [...FAQ] // array of char ['Q',  ' ', 'w', 'h', 'y', ' ', 'd', 'o', ' ', 'i']
-                    .join('').split(' ') // ['Q', 'why','do','i','need',o','install','a','virtual','machine, etc]
-                
-                // delete first attempt
-                // note true keeps char, false discards char 
-                // .filter((char, i, arr) => { // remove words with length smaller than consecutive match length
-                //     // if ( (((arr.length - i) >! settings.consecutive)) ) // comparison
-                //     let count = 0, 
-                //         keepChar = true; // assume we keep char and then test if we shouldnt
-
-                //     // we need to skip the testing if a word has been accepted
-                //     if (char == ' ' && longEnoughCount) longEnoughWord = false;
-                //     if (longEnoughWord && longEnoughCount) {
-                //         longEnoughCount--;
-                //         return true;
-                //     }
-                //     else {
-                //         longEnoughWord = false;
-                //         longEnoughCount = 0;
-                //     }
-
-                //     if (longEnoughWord && longEnoughCount) {
-                //         console.warn(`Error in FAQ partial comparison`);
-                //         throw new Error('this should never have been thrown')
-                //     }
-
-                //     // fixme currently removing all spaces, only needs to do so when a word is removed
-                //     while ( 
-                //             (count < settings.consecutive) && // only test for string length equal to consecutive
-                //             (i + settings.consecutive <= arr.length) && // only test until you reach the last possible matching characters
-                //             keepChar && !longEnoughWord ) // failsafe
-                //         {
-                //         if ( arr[i + count].toLowerCase() == ' ' ) keepChar = false; // if char a space dont keep
-                //         count++;
-                //     }
-
-                //     if (keepChar) {
-                //         longEnoughWord = true;
-                //         longEnoughCount = settings.consecutive; // subtract until 0 // Boolean(0) == false // any value above 0 == true
-                //     }
-                    
-                //     // console.log(`partial match result`);
-                //     // console.log(`arr`, arr);
-                //     // console.log(`index & char & keepChar`, i, `'${char}'`, '-', keepChar);
-                //     // console.log(`long enough & remaining count`, longEnoughWord, longEnoughCount);
-                //     return keepChar;
-                // }) 
-                // ['Q', 'why','do','i','need',o','install','a','virtual','machine, etc]
-
-                    // remove everything smaller than consecutive length
-                    .filter( (word) => !(word.length < settings.consecutive) ), // ['why','need', 'install','virtual','machine, etc]
-                    // if (!i) console.log(`Current:`, arr);
-                    // console.log(`index: `, i);
-                    // console.log(`word: `, word);
-                    // console.log(`word length:`, word.length);
-                    // console.log(``);
-                 
-                    // // if skipCounter > 0 then return true and decrease skip
-                    // if (skipCounter) { // Boolean(1+) == true
-                    //     skipCounter--;
-                    //     return true;
-                    // } // else Boolean(0) == false
-                    
-                    // list all filter conditions/ anything that eliminates an option
-                    // if word smaller than consecutive then there is no point testing it for a partial match
-                    // if (word.length < settings.consecutive) return false; // false filters out
-
-                    // keep everything else
-                    // return true;
-
-
-            // .map((val, i, arr) => {if (!i) {console.log(`array:`, arr);}; return val}) // use this to see data  
-    msg = [...MSG] // [ 'install', 'vm', 'onto', 'computer' ]
-                // remove everything smaller than consecutive length
-                .filter(keyword => !(keyword.length < settings.consecutive) ); // [ 'install', 'onto', 'computer' ]
-    // .map(word => word.split('')) // array of array of char [[ 'h', 'e', 'l', 'l', 'o' ], ['w', 'o', 'r', 'l', 'd']]
+                        // .map((val, i, arr) => {if (!i) {console.log(`array:`, arr);}; return val}) // use this to see data  
+                        .join('').split(' ') // ['Q', 'why','do','i','need',o','install','a','virtual','machine, etc]
+                        // remove everything smaller than consecutive length
+                        .filter( (word) => !(word.length < settings.consecutive) ), // ['why','need', 'install','virtual','machine, etc]
+            msg = [...MSG] // [ 'install', 'vm', 'onto', 'computer' ]
+                        .filter( (word) => !(word.length < settings.consecutive) ); // [ 'install', 'onto', 'computer' ]
     
-    // todo
-    // index of faq is handled outside of the function only index of each word within msg matters
-
-    // })
-
-    // console.log(`- Partial match debugger -`);
-    // console.log(`       faq:`, faq); // ['why','need', 'install','virtual','machine, etc]
-    // console.log(`       msg:`, msg); // [ 'install', 'onto', 'computer' ]
-
     const match = [];
 
     msg.forEach( (msgKeyword, i) => {
@@ -192,13 +88,6 @@ const filterFAQ = function (userInputArr, FAQarr, strict = { bool: false, consec
             let x = 0, found = false, debug;
             Object.freeze(faq); // frozen just incase 
 
-            // faq.forEach(str => { 
-            //     // console.log(`str`, str);
-            //     const key = txt.find( msg => str.toLowerCase() == msg.toLowerCase() );
-            //     if (key) allMatches.push(key);
-            //     // console.log(`key`, key);
-            // });
-
             // guard clause format rather than another layer of nesting
             // non strict comparison
             // todo need store index i // refactor // matched.push(  )
@@ -213,9 +102,6 @@ const filterFAQ = function (userInputArr, FAQarr, strict = { bool: false, consec
                 
                 return faq;
             }; // else
-
-            // const partialOuput = [];
-            // nonStrictComparison(faqWithSpaces, txt, partial, partialOuput, strict); // just triggering console.log doesnt affect result
 
             // strict comparison
             while (x < faq.length) { // try to refactor this
@@ -235,19 +121,10 @@ const filterFAQ = function (userInputArr, FAQarr, strict = { bool: false, consec
             return faq; // remember to return with map
         }); 
         
-    // console.log(`debug matched keywords:`, matched);
-
     // tracing exists in order to add more works to the filter
     // this is a manual process but with some time most keywords will be relevant
     if (trace.bool) {
-    // console.log(`- start data tracing -`);
-
-        // console.log(`   ALL MATCHES   :`, (allMatches.length > 0) ? [ ...new Set(allMatches)] : 'none');
         console.log(`   ${!strict.bool? 'STRICT MATCH' : 'PARTIAL MATCH'}:`, (matched.length > 0) ? [ ...new Set(matched)] : 'none');
-        // else                console.log(`   PARTIAL MATCH :`, (matched.length > 0) ? [ ...new Set(matched)] : 'none'); 
-
-    // console.log(`- end data tracing -`);
-    // console.log(``);
     }
 
     console.log(`   ----------------`);
