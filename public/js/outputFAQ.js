@@ -6,7 +6,7 @@ import { blacklistKeywords, punctuationArr } from "./settings.js";
 const replaceByArray = function (text = '', punctuationArray = [ ...punctuationArr ], replacementChar = ' ') {
     let output = text.slice(0); // dont mutate parameters // replaceAll doesn't mutate it returns new str
 
-    punctuationArray.forEach (char => { output = output.replaceAll(`${char}`, `${replacementChar}`); }); // doesnt expressly return
+    punctuationArray.forEach (char => { output = output.replaceAll(`${char}`, `${replacementChar}`); }); 
 
     return output;
 }
@@ -71,6 +71,7 @@ const filterFAQ = function (userInputArr, FAQarr, strict = { bool: false, consec
     // store array of index rather than filter array to preserve original copy
     // and allow a new array to be filtered by the index rather than the content
     const outputIndexArray = [], matchedKeywordsArray = []; 
+    const outputIndexArrayP = [], matchedKeywordsArrayP = []; // delete just for testing
     let faqWithSpaces;
 
     FAQ // ['Q: this. A: that.'] 
@@ -81,22 +82,28 @@ const filterFAQ = function (userInputArr, FAQarr, strict = { bool: false, consec
             .filter (el => el != '' && el != ' ') // ['Q', 'this', 'A', 'that'] // remove spaces       
         })
         .map ((faq, i, ar) => { // faq is an array of words
-            Object.freeze(faq); // frozen just incase 
+            Object.freeze(faq); // frozen
 
-            // guard clause format rather than another layer of nesting
+            // fix logic // priority ***
+            // refactor use sets // priority **
+            // note calculate strict keywords add them to set
+            // note then add partial keywords and test all before returning functionality
+            // note if partial not enabled then dont add them to keywords
+
             // non strict comparison
-            if (!strict.bool) {
+            if (true) { // debug delete once working
+            // if (!strict.bool) { // debug uncomment once working
                 const temp = [...nonStrictComparison(faqWithSpaces, txt, strict)];
 
                 if (temp.length > 0) {  // match found
-                    outputIndexArray.push(i);
-                    matchedKeywordsArray.push( ...temp );
+                    outputIndexArrayP.push(i); // debug remove P once working and delete declaration
+                    matchedKeywordsArrayP.push( ...temp ); // debug remove P once working and delete declaration
                 }
                 
-                return faq; // remember to return with map
-            }; // else strict comparison
-
+                // return faq; // remember to return with map // debug uncomment once working
+            }; // else strict comparison // idea do both rather than just one depending on bool
             txt.forEach( userKeyword => { // [ 'install', 'vm', 'onto', 'computer' ]
+                Object.freeze(userKeyword); // frozen
                 let index;
                 const findKeyword = faq.find( (faqKeyword, i) => {
                     index = i;
@@ -114,13 +121,21 @@ const filterFAQ = function (userInputArr, FAQarr, strict = { bool: false, consec
         }); // end FAQ.map();
     
         console.log(`>>>>>>>>>>>>> results >>>>>>>>>>>>>`);
-        console.log(`index array:`, outputIndexArray); // fixme
-        console.log(`keywords array:`, matchedKeywordsArray);
+        console.log(`--- strict ---`); 
+        console.log(`index:`, outputIndexArray, '||', 'expected result', [5]); // fixme storing index out of bounds
+        console.log(`keywords:`, matchedKeywordsArray, '||', 'expected result', ['install', 'vm']);
+        console.log(``);
+
+        console.log(`--- Partial ---`);
+        console.log(`index:`, outputIndexArrayP, '||', 'expected result', [4, 5]); // fixme storing every index // note however nothing out of bounds
+        console.log(`keywords:`, matchedKeywordsArrayP, '||', 'expected result', ['install']); // fixme storing only one match length +1 times
+        console.log(``);
         
     // tracing exists in order to add more works to the filter
     // this is a manual process but with some time most keywords will be relevant
     if (trace.bool) {
-        console.log(`   ${strict.bool? 'STRICT MATCH' : 'PARTIAL MATCH'}:`, (matchedKeywordsArray.length > 0) ? [ ...new Set(matchedKeywordsArray)] : 'none');
+        console.log(`Matching Type :` , `${(strict.bool)? 'STRICT' : 'PARTIAL'}`); // todo strict and partial
+        console.log(`Keywords      :`, (matchedKeywordsArray.length > 0) ? [ ...new Set(matchedKeywordsArray)] : 'none'); // todo strict and partial
     }
 
     console.log(`   ----------------`);
@@ -140,9 +155,10 @@ const filterFAQ = function (userInputArr, FAQarr, strict = { bool: false, consec
     // and if you do it wont affect the rest of the app (if done within reason)
 // using defaults to specify expected data types
 const outputFAQ = function (
-    userTxt = `!abort`, // clean user message string (can be multi-lined)
-    FAQquestions = [`!abort`], // array of FAQ current testing format ['Q: this. /n A: that.'] 
+    userTxt = ``, // clean user message string (can be multi-lined)
+    FAQquestions = [``], // array of FAQ current format array of string ['Q: this. /n A: that.'] 
     // unforseen error: when trying to alter one or more keywords in settings you overwrite the entire object, deleting the other defaults
+    // abstraction of settings
     settings = { // be careful when overwriting this // refactor  // fixme
         wordsToIgnore: blacklistKeywords, // common words that result in a false positive when comparing
         punctuationToReplace: punctuationArr, // array of punctuation to replace with '' when comparing string
@@ -176,7 +192,12 @@ const outputFAQ = function (
         filteredFAQ.push(FAQ[index]);
     });
 
-    console.log(`   Total Matches :`, [ ...new Set(filteredFAQ)].length);
+    // debug // delete
+    console.log(`FAQ`); 
+    FAQquestions.forEach ( (str, i) => console.log(`#`,i,' - ', str.replace('A:', '        A:')) );
+    console.log(``);
+    console.log(`   Total Matches:`, [ ...new Set(filteredFAQ)].length);
+    console.log(`Expected results:`, `strict -`, 1, '||', 'partial -', 2);
     console.log(``);
 
     // set is similar to an array except it cant hold duplicates and is an object not array
