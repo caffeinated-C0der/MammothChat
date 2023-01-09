@@ -82,6 +82,10 @@ if (false) { // bulk
     console.log(`-- end case #`, i +1, '--');
     console.log(``);
 })} else { // single
+    console.log(`Input`);
+    faqInputArray.forEach ( (str, i) => console.log(`#`,i,' - ', str.replace('A:', '        A:')) ); // like a genius forgot this is all 
+    console.log(``);
+
     const [question] = userMessages.slice(-1);
     console.log(`- testing case #`, userMessages.length -1, '-');
     console.log(`User: ${question}`);
@@ -89,7 +93,7 @@ if (false) { // bulk
     try { // just to catch unforseen errors
         console.log(`FAQ Trace:`);
         const output = outputFAQ(question, faqInputArray);
-        console.log(`Result:\n${output}`);
+        console.log(`Output:\n${output}`);
     } catch (error) {
         console.warn(` === FAQ failed === `);
         console.error(error);

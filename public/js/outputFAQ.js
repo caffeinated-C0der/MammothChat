@@ -75,24 +75,34 @@ const filterFAQ = function (userInputArr, FAQarr, strict = { bool: false, consec
     let faqWithSpaces;
 
     FAQ // ['Q: this. A: that.'] 
-        .map (sentence => {
-            faqWithSpaces = replaceByArray(sentence, punctuationArr, '');
+        .map(sentenceStr => sentenceStr.replaceAll('\n', ' ')) // remove \n tags before we split else headache
+        .map (sentenceStr => {
+            faqWithSpaces = replaceByArray(sentenceStr, punctuationArr, '');
             return faqWithSpaces // ['Q  this   A  that '] // remove punctuation
             .split (' ') // ['Q', '', '', 'this', '', '', '', 'A', '', '', 'that', ''] // split into array  
-            .filter (el => el != '' && el != ' ') // ['Q', 'this', 'A', 'that'] // remove spaces       
+            .filter (el => el != '' && el != ' ') // ['Q', 'this', 'A', 'that'] // remove spaces 
+            // .map((val, i, arr) => {if (!i) {console.log(`array:`, arr);}; return val}) // delete
         })
+        // this map is more like a forEach
         .map ((faq, i, ar) => { // faq is an array of words
+            /* i= 5 
+                faq = [ 'Q', 'why', 'do', 'i', 'need', 'to', 'install',  'a', 'virtual',  'machine\nA', 
+                        'because', 'cross', 'platform', 'support', 'is', 'a', 'bit', 'janky', 'without',  'a', 'vm' ]  */
             Object.freeze(faq); // frozen
 
             // fix logic // priority ***
-            // refactor use sets // priority **
+            // refactor use sets // priority *
             // note calculate strict keywords add them to set
             // note then add partial keywords and test all before returning functionality
             // note if partial not enabled then dont add them to keywords
 
+            // note dont overwrite i
             // non strict comparison
             if (true) { // debug delete once working
             // if (!strict.bool) { // debug uncomment once working
+
+            // note words like chemistry and biochemistry wont match with current partial Matching
+            // todo revise or expand working functionality to include partial matches within words
                 const temp = [...nonStrictComparison(faqWithSpaces, txt, strict)];
 
                 if (temp.length > 0) {  // match found
@@ -102,27 +112,31 @@ const filterFAQ = function (userInputArr, FAQarr, strict = { bool: false, consec
                 
                 // return faq; // remember to return with map // debug uncomment once working
             }; // else strict comparison // idea do both rather than just one depending on bool
-            txt.forEach( userKeyword => { // [ 'install', 'vm', 'onto', 'computer' ]
+            txt.forEach( (userKeyword, k, arr) => { // [ 'install', 'vm', 'onto', 'computer' ]
                 Object.freeze(userKeyword); // frozen
-                let index;
-                const findKeyword = faq.find( (faqKeyword, i) => {
-                    index = i;
+                // let index;
+                const findKeyword = faq.find( (faqKeyword, j, arr) => {
+                    // index = j; // fixed there is your problem
                     return faqKeyword.toLowerCase() == userKeyword.toLowerCase();
                 } ); // returns true or undefined
 
                 // if keyword not found exit else store result
-                if (!findKeyword) return; // if undefined return
+                if (!findKeyword) return; // if undefined return // foreach return not .map
 
-                outputIndexArray.push(index);
+                // console.log(`storing result as index: keyword`,'-', index,':',key);
+                // console.log(`find i: arr`,k,':', t); // this is array of words within faq
+                // console.log(`foreach i:`,i); 
+
+                outputIndexArray.push(i);
                 matchedKeywordsArray.push(userKeyword);
             });
 
-            return faq; // remember to return with map
+            return faq; // remember to return with map // refactor this is a forEach, dont need to map
         }); // end FAQ.map();
     
         console.log(`>>>>>>>>>>>>> results >>>>>>>>>>>>>`);
         console.log(`--- strict ---`); 
-        console.log(`index:`, outputIndexArray, '||', 'expected result', [5]); // fixme storing index out of bounds
+        console.log(`index:`, outputIndexArray, '||', 'expected result', [5]); // fixme convert to set to remove duplicates
         console.log(`keywords:`, matchedKeywordsArray, '||', 'expected result', ['install', 'vm']);
         console.log(``);
 
@@ -134,8 +148,10 @@ const filterFAQ = function (userInputArr, FAQarr, strict = { bool: false, consec
     // tracing exists in order to add more works to the filter
     // this is a manual process but with some time most keywords will be relevant
     if (trace.bool) {
-        console.log(`Matching Type :` , `${(strict.bool)? 'STRICT' : 'PARTIAL'}`); // todo strict and partial
-        console.log(`Keywords      :`, (matchedKeywordsArray.length > 0) ? [ ...new Set(matchedKeywordsArray)] : 'none'); // todo strict and partial
+        //currently only outputing strict
+        console.log(`Matching Type :` , `${(true)? 'STRICT' : 'PARTIAL'}`); // todo strict and partial
+        console.log(`Keywords      :`, ( matchedKeywordsArray.length > 0) ? [ ...new Set(matchedKeywordsArray)] : 'none'); // todo strict and partial
+        console.log(`indexes       :`, outputIndexArray);
     }
 
     console.log(`   ----------------`);
@@ -143,7 +159,9 @@ const filterFAQ = function (userInputArr, FAQarr, strict = { bool: false, consec
     // array of indexes that had a keyword match
     // set eliminates any possible duplicates
     // set needs to be spread because it's an object not an array
-    return [ ...new Set(outputIndexArray) ]; // fixme somehow outputs all entries
+    // return [ ...new Set(outputIndexArray) ]; 
+    // return [ ...new Set((strict.bool)? outputIndexArray : matchedKeywordsArrayP) ]; // returning keywords like a dumbass
+    return [ ...new Set((strict.bool)? outputIndexArray : outputIndexArrayP) ]; // delete outputIndexArrayP partial works
 }
 
 // consider moving main function to the top of the scope - functions are hoisted
@@ -193,8 +211,9 @@ const outputFAQ = function (
     });
 
     // debug // delete
-    console.log(`FAQ`); 
-    FAQquestions.forEach ( (str, i) => console.log(`#`,i,' - ', str.replace('A:', '        A:')) );
+    console.log(`FAQ:`); 
+    // FAQquestions.forEach ( (str, i) => console.log(`#`,i,' - ', str.replace('A:', '        A:')) ); // like a genius forgot this is all 
+    filteredFAQ.forEach ( (str, i) => console.log(str.replace('A:', '        A:')) );
     console.log(``);
     console.log(`   Total Matches:`, [ ...new Set(filteredFAQ)].length);
     console.log(`Expected results:`, `strict -`, 1, '||', 'partial -', 2);
