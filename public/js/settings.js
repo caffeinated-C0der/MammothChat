@@ -4,7 +4,8 @@
 
 // note FAQ control objects
 const blacklistKeywords = [
-    'to', 'the', 'like', 'do', 'that', 'is', 'can', 'i', 'am', 'a', 'how', 'my', 'me'//, 'need', 
+    'to', 'the', 'like', 'do', 'that', 'is', 'can', 'i', 'am', 'a', 'how', 'my', 'me',
+     'you', 'what', 'need',  'your', 'who', 'are', 'could', 'for', 'out', 'of'
 ]; // keywords that doesn't contribute to the filter like "to, the, like, do, that", etc
 
 const punctuationArr = [ 

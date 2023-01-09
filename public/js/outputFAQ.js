@@ -73,11 +73,15 @@ const filterFAQ = function (userInputArr, FAQarr, strict = { bool: false, consec
     const outputIndexArray = [], matchedKeywordsArray = []; 
     const outputIndexArrayP = [], matchedKeywordsArrayP = []; // delete just for testing
     let faqWithSpaces;
+    let faqWithSpacesP = [];
 
     FAQ // ['Q: this. A: that.'] 
         .map(sentenceStr => sentenceStr.replaceAll('\n', ' ')) // remove \n tags before we split else headache
         .map (sentenceStr => {
-            faqWithSpaces = replaceByArray(sentenceStr, punctuationArr, '');
+            faqWithSpaces = replaceByArray(sentenceStr, punctuationArr, '');;
+
+            faqWithSpacesP.push(replaceByArray(sentenceStr, punctuationArr, ''));
+
             return faqWithSpaces // ['Q  this   A  that '] // remove punctuation
             .split (' ') // ['Q', '', '', 'this', '', '', '', 'A', '', '', 'that', ''] // split into array  
             .filter (el => el != '' && el != ' ') // ['Q', 'this', 'A', 'that'] // remove spaces 
@@ -90,20 +94,20 @@ const filterFAQ = function (userInputArr, FAQarr, strict = { bool: false, consec
                         'because', 'cross', 'platform', 'support', 'is', 'a', 'bit', 'janky', 'without',  'a', 'vm' ]  */
             Object.freeze(faq); // frozen
 
-            // fix logic // priority ***
             // refactor use sets // priority *
             // note calculate strict keywords add them to set
             // note then add partial keywords and test all before returning functionality
             // note if partial not enabled then dont add them to keywords
 
-            // note dont overwrite i
+            // note dont overwrite i 
             // non strict comparison
             if (true) { // debug delete once working
             // if (!strict.bool) { // debug uncomment once working
 
             // note words like chemistry and biochemistry wont match with current partial Matching
             // todo revise or expand working functionality to include partial matches within words
-                const temp = [...nonStrictComparison(faqWithSpaces, txt, strict)];
+                // const temp = [...nonStrictComparison(faqWithSpaces, txt, strict)];
+                const temp = [...nonStrictComparison(faqWithSpacesP[i], txt, strict)];
 
                 if (temp.length > 0) {  // match found
                     outputIndexArrayP.push(i); // debug remove P once working and delete declaration
@@ -135,23 +139,31 @@ const filterFAQ = function (userInputArr, FAQarr, strict = { bool: false, consec
         }); // end FAQ.map();
     
         console.log(`>>>>>>>>>>>>> results >>>>>>>>>>>>>`);
+        // console.log(`expected results may now be missing matches due to updated junk data`);
         console.log(`--- strict ---`); 
-        console.log(`index:`, outputIndexArray, '||', 'expected result', [5]); // fixme convert to set to remove duplicates
-        console.log(`keywords:`, matchedKeywordsArray, '||', 'expected result', ['install', 'vm']);
+        // console.log(`index:`, outputIndexArray, '||', 'expected result', [5]); // fixme use set to eliminate duplicates
+        // console.log(`keywords:`, matchedKeywordsArray, '||', 'expected result', ['install', 'vm']);
+
+        console.log(`index:`, [...new Set(outputIndexArray)]); // fixme use set to eliminate duplicates
+        console.log(`keywords:`, [...new Set(matchedKeywordsArray)]);
         console.log(``);
 
         console.log(`--- Partial ---`);
-        console.log(`index:`, outputIndexArrayP, '||', 'expected result', [4, 5]); // fixme storing every index // note however nothing out of bounds
-        console.log(`keywords:`, matchedKeywordsArrayP, '||', 'expected result', ['install']); // fixme storing only one match length +1 times
+        // console.log(`index:`, outputIndexArrayP, '||', 'expected result', [4, 5]); 
+        // console.log(`keywords:`, matchedKeywordsArrayP, '||', 'expected result', ['install']); // fixme use set to eliminate duplicates
+
+        console.log(`index:`, [...new Set(outputIndexArrayP)]); // note thanks daniel
+        console.log(`keywords:`, [...new Set(matchedKeywordsArrayP)]); // fixme use set to eliminate duplicates
         console.log(``);
         
     // tracing exists in order to add more works to the filter
     // this is a manual process but with some time most keywords will be relevant
     if (trace.bool) {
         //currently only outputing strict
-        console.log(`Matching Type :` , `${(true)? 'STRICT' : 'PARTIAL'}`); // todo strict and partial
-        console.log(`Keywords      :`, ( matchedKeywordsArray.length > 0) ? [ ...new Set(matchedKeywordsArray)] : 'none'); // todo strict and partial
-        console.log(`indexes       :`, outputIndexArray);
+        console.log(`Matching Type :` , `${(strict.bool)? 'STRICT' : 'PARTIAL'}`); // todo strict and partial
+        // next two only works for strict // todo
+        // console.log(`Keywords      :`, ( matchedKeywordsArray.length > 0) ? [ ...new Set(matchedKeywordsArray)] : 'none'); // todo strict and partial
+        // console.log(`indexes       :`, outputIndexArray);
     }
 
     console.log(`   ----------------`);
@@ -181,7 +193,7 @@ const outputFAQ = function (
         wordsToIgnore: blacklistKeywords, // common words that result in a false positive when comparing
         punctuationToReplace: punctuationArr, // array of punctuation to replace with '' when comparing string
         punctuationReplaceChar: '', // character to replace punctuation
-        strictFilter: true, // strict string comparison or partial comparison // not implemented yet // todo 
+        strictFilter: false, // strict string comparison or partial comparison // not implemented yet // todo 
         consecutiveMatch: 3 // how many consecutive characters need to match in a parial comparison // todo 
     }) {
 
@@ -216,12 +228,12 @@ const outputFAQ = function (
     filteredFAQ.forEach ( (str, i) => console.log(str.replace('A:', '        A:')) );
     console.log(``);
     console.log(`   Total Matches:`, [ ...new Set(filteredFAQ)].length);
-    console.log(`Expected results:`, `strict -`, 1, '||', 'partial -', 2);
+    // console.log(`Expected results:`, `strict -`, 1, '||', 'partial -', 2);
     console.log(``);
 
     // set is similar to an array except it cant hold duplicates and is an object not array
     // by spreading the set object '...' it can be converted into an array format
-    return ( filteredFAQ.length > 0 ) ? [ ...new Set(filteredFAQ)].join('\n') : 'I failed to compile any FAQ related to your problem.'; // string
+    return ( filteredFAQ.length > 0 ) ? [ ...new Set(filteredFAQ)].join('\n') : '       I failed to compile any FAQ related to your problem.'; // string
 }
 
 export { outputFAQ }; 
