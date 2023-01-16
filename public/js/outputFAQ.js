@@ -189,18 +189,27 @@ const outputFAQ = function (
     FAQquestions = [``], // array of FAQ current format array of string ['Q: this. /n A: that.'] 
     // unforseen error: when trying to alter one or more keywords in settings you overwrite the entire object, deleting the other defaults
     // abstraction of settings
-    settings = { // be careful when overwriting this // refactor  // fixme
+    settings = { 
         wordsToIgnore: blacklistKeywords, // common words that result in a false positive when comparing
         punctuationToReplace: punctuationArr, // array of punctuation to replace with '' when comparing string
         punctuationReplaceChar: '', // character to replace punctuation
-        strictFilter: false, // strict string comparison or partial comparison // not implemented yet // todo 
-        consecutiveMatch: 3 // how many consecutive characters need to match in a parial comparison // todo 
+        strictFilter: false, // strict string comparison or partial comparison 
+        consecutiveMatch: 3 // how many consecutive characters need to match in a parial comparison
     }) {
 
     // a litte destructoring // avoids having to use settings. for every variable
-    // FAQ renamed so that I can use it as a new variable called FAQ
-    const { wordsToIgnore, punctuationToReplace, punctuationReplaceChar, strictFilter, consecutiveMatch } = settings; // fixme 
-    // idea for every setting, check if it exists then use it else use default, objects overwrite defaults 
+    // using destructoring as a practical way of redefining undefined settings
+    // re-assigning defaults because if they aren't in the new settings parameters this function will break
+    // technically to avoid DRY you would not declare them in the parameters but then the dev cant see what 
+    // the variables are for and how to use them
+    // debug ensure that this destructoring doesn't overwrite redefined parameters but act mainly as defaults
+    const { 
+        wordsToIgnore = blacklistKeywords, 
+        punctuationToReplace = punctuationArr, 
+        punctuationReplaceChar = '', 
+        strictFilter = false, 
+        consecutiveMatch = 3
+    } = settings; 
 
     let text = userTxt.slice(0); // make a copy
     const FAQ = [...FAQquestions]; // copy
