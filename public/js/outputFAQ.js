@@ -2,18 +2,36 @@
 // different level of abstraction to avoid altering the FAQ function
 import { blacklistKeywords, punctuationArr } from "./settings.js"; 
 
+// probably overcomplicating it
+// const formatObjects = function (output, parametersObj, name = '') {
+//     return function() {
+//         return {name, paramerters: parametersObj, output}
+//     }
+// }
+
+// const formatObjects = (output, parametersObj = {}, name = '') => { return { name, paramerters: parametersObj, output } };
+
+// ---------------------- * Helper functions * ---------------------- //
 // replace characters function
-const replaceByArray = function (text = '', punctuationArray = [ ...punctuationArr ], replacementChar = ' ') {
+// DRY defaults but this function has a settings object that has to be handled strictly
+const replaceByArray = function (text = '', settings = { punctuationArray : [ ...punctuationArr ], replacementChar : ' '}) {
     let output = text.slice(0); // dont mutate parameters // replaceAll doesn't mutate it returns new str
+
+    // warning // todo overwrite any nonexisting defaults
+    // destructoring in order to pass objects around as parameters
+    const {punctuationArray, replacementChar} = settings;
 
     punctuationArray.forEach (char => { output = output.replaceAll(`${char}`, `${replacementChar}`); }); 
 
+    // dont overcomplicate it return expected result and only pass objects in main function
+    // return { input: text, settings : { punctuationArray, replacementChar}, output };
     return output;
+    // return formatObjects(replaceByArray.name, {text, punctuationArray, replacementChar}, output);
 }
 
-// return a copy of an array that has the correct keywords removed
-// dont pull default data from top 
 // this function removes invalid keywords from an array of keywords
+// return a copy of an array that has the correct keywords removed
+// only define defaults as the correct data type of a null equivalent, let the main function handle data defaults
 const removeFalsePositives = function(strArr = [''], keywordsToRemove = ['']) { 
     // make a copy of the original then filter array
         // by not returning the entries that are found within the remove array
@@ -23,7 +41,8 @@ const removeFalsePositives = function(strArr = [''], keywordsToRemove = ['']) {
     return filteredArr; // return new array rather than mutating parameter
 }
 
-// idea return object instead of values
+// ---------------------- * Comparison functions * ---------------------- //
+
 // dont mutate parameters
 // Partial string comparison by comparing a certain amount of character instead of the whole word
 // compares from the start of the word up to the consecutive length for both sets of keywords
@@ -56,20 +75,83 @@ const nonStrictComparison = function (
         } );
     } );
 
-    // idea maybe return an object? object in object out
     return match; 
 }
 
-// filter FAQ array for keywords that match the user input then returns the filtered FAQ array // I don't think this mutates either
-// dont pull defaults from top scope let the function supply them
-// todo abstract object settings from parameters to avoid accidental parameter deletion 
-const filterFAQ = function (userInputArr, FAQarr, strict = { bool: false, consecutive: 3 }, trace = { bool: true }) { 
+// refactor // todo split existing comparison filters each into their own sub function
+// note we currentlt have strict, strictPartial & partial
+
+// refactor version of partial matching by daniel
+// refactor work it back into the main logic the start should be the same as current logic 
+// refactor with only the lower part being different
+// rename into parial existing two methods are strict and strictPartial respectively
+//a different version of partial match. Looks to find matches to any substring of length specified in settings obj
+const partialComparison = function (
+    FAQ = [], // FROZEN FAQ is an array of words 
+    MSG = [], // array of words 
+    settings = { bool: true, consecutive: 3 } // be very careful with this variable // todo fix all object parameters
+) {
+    console.warn(`partialComparison method still needs to be worked into the filter matching`);
+    //note we should probably do a strict check for words smaller than settings.consecutive, to catch things like 'VM'
+    // .map((val, i, arr) => {if (!i) {console.log(`array:`, arr);}; return val}) // use this to see data  
+    const   faq = [...FAQ] // array of char ['Q',  ' ', 'w', 'h', 'y', ' ', 'd', 'o', ' ', 'i']
+                        .join('').split(' ') // ['Q', 'why','do','i','need',o','install','a', etc]
+                        // remove everything smaller than consecutive length
+                        .filter( (word) => !(word.length < settings.consecutive) ), // ['why','need', 'install','virtual','machine, etc]
+            msg = [...MSG] // [ 'install', 'vm', 'onto', 'computer' ]
+                        .filter( (word) => !(word.length < settings.consecutive) ); // [ 'install', 'onto', 'computer' ]
+    const match = [];
+    //just making copies, variable naming is terrible i know
+    const faq2 = [];
+    const msg2 = [];
+    //taking every substring of length == settings.consecutive and pushing to faq2
+    faq.forEach((word) => {
+        for(let i = 0; i + settings.consecutive <= word.length; i++){
+            let tempWord = word.slice(i, i + settings.consecutive);
+            faq2.push(tempWord);
+        }
+    })
+    //taking every substring of length == settings.consecutive and pushing to msg2
+    msg.forEach((word) => {
+        for(let i = 0; i + settings.consecutive <= word.length; i++){
+            let tempWord = word.slice(i, i + settings.consecutive);
+            msg2.push(tempWord);
+        }
+    })
+    //comparing every keyword between msg2 and faq2, and pushing any matches to the array 'match'
+    msg2.forEach( (faqKeyword, i) => {
+        faq2.forEach( (msgKeyword, j) => {
+            if(faqKeyword != msgKeyword) {
+                return match;
+            }
+            else{
+                match.push(msg2[i]);
+            }
+        })
+    });
+    console.log('Partial matches: ', match);
+    return match;
+}
+
+// ---------------------- * Main Filter Logic * ---------------------- //
+
+// const filterFAQ = function (userInputArr, FAQarr, strict = { bool: false, consecutive: 3 }, trace = { bool: true }) { 
+const filterFAQbackup = function (userInputArr, settings = new Controller([''])) { // Defaults doesnt have an FAQ property
     // remove the default but also enforce the correct type
-    const FAQ = (  Array.isArray(FAQarr) ) ? [ ...FAQarr ] : [ '' ]; // copy
+    const FAQ = (  Array.isArray(settings.FAQ) ) ? [ ...FAQarr ] : [ '' ]; // copy
     const txt = (  Array.isArray(userInputArr) ) ? [ ...userInputArr ] : [ '' ]; // copy
+
+    // const FAQ = (  Array.isArray(FAQarr) ) ? [ ...FAQarr ] : [ '' ]; // copy
+    // const txt = (  Array.isArray(userInputArr) ) ? [ ...userInputArr ] : [ '' ]; // copy
+
+    // destructoring dependancies
+    const { filterParial, filterSemiStrict, filterStrict, consecutiveCount } = settings;
 
     // store array of index rather than filter array to preserve original copy
     // and allow a new array to be filtered by the index rather than the content
+    const matchedKeywords = new Set(), // todo using single set for compilation 
+          matchedIndex    = new Set();
+
     const outputIndexArray = [], matchedKeywordsArray = []; 
     const outputIndexArrayP = [], matchedKeywordsArrayP = []; // delete just for testing
     let faqWithSpaces;
@@ -78,14 +160,14 @@ const filterFAQ = function (userInputArr, FAQarr, strict = { bool: false, consec
     FAQ // ['Q: this. A: that.'] 
         .map(sentenceStr => sentenceStr.replaceAll('\n', ' ')) // remove \n tags before we split else headache
         .map (sentenceStr => {
-            faqWithSpaces = replaceByArray(sentenceStr, punctuationArr, '');;
+            faqWithSpaces =  replaceByArray( sentenceStr, { punctuationArr, replacementChar: '' } ) ;
 
-            faqWithSpacesP.push(replaceByArray(sentenceStr, punctuationArr, ''));
+            faqWithSpacesP.push( replaceByArray(sentenceStr, { punctuationArr, replacementChar: '' }) );
 
             return faqWithSpaces // ['Q  this   A  that '] // remove punctuation
             .split (' ') // ['Q', '', '', 'this', '', '', '', 'A', '', '', 'that', ''] // split into array  
             .filter (el => el != '' && el != ' ') // ['Q', 'this', 'A', 'that'] // remove spaces 
-            // .map((val, i, arr) => {if (!i) {console.log(`array:`, arr);}; return val}) // delete
+            // .map((val, i, arr) => {if (!i) {console.log(`array:`, arr);}; return val}) // tool
         })
         // this map is more like a forEach
         .map ((faq, i, ar) => { // faq is an array of words
@@ -94,7 +176,7 @@ const filterFAQ = function (userInputArr, FAQarr, strict = { bool: false, consec
                         'because', 'cross', 'platform', 'support', 'is', 'a', 'bit', 'janky', 'without',  'a', 'vm' ]  */
             Object.freeze(faq); // frozen
 
-            // refactor use sets // priority *
+            // refactor use sets // priority **
             // note calculate strict keywords add them to set
             // note then add partial keywords and test all before returning functionality
             // note if partial not enabled then dont add them to keywords
@@ -176,9 +258,136 @@ const filterFAQ = function (userInputArr, FAQarr, strict = { bool: false, consec
     return [ ...new Set((strict.bool)? outputIndexArray : outputIndexArrayP) ]; // delete outputIndexArrayP partial works
 }
 
+// filter FAQ array for keywords that match the user input then returns the filtered FAQ array // I don't think this mutates either
+// dont pull defaults from top scope let the function supply them
+const filterFAQ = function (userInputArr, settings = new Controller([''])) { // Defaults doesnt have an FAQ property
+    // remove the default but also enforce the correct type
+    const FAQ = (  Array.isArray(settings.FAQ) ) ? [ ...FAQarr ] : [ '' ]; // copy
+    const txt = (  Array.isArray(userInputArr) ) ? [ ...userInputArr ] : [ '' ]; // copy
+
+    // destructoring dependancies
+    const { filterParial, filterSemiStrict, filterStrict, consecutiveCount } = settings;
+
+    // store array of index rather than filter array to preserve original copy
+    // and allow a new array to be filtered by the index rather than the content
+    const matchedKeywords = new Set(), // todo using single set for compilation 
+          matchedIndex    = new Set();
+
+    const faqWithSpaces = [];
+
+    FAQ // ['Q: this. A: that.'] 
+        .map(sentenceStr => sentenceStr.replaceAll('\n', ' ')) // remove \n tags before we split else headache
+        .map (sentenceStr => {
+            faqWithSpaces.push( replaceByArray(sentenceStr, { punctuationArr, replacementChar: '' }) ); // todo settings // fixme
+
+            return faqWithSpaces // ['Q  this   A  that '] // remove punctuation
+            .split (' ') // ['Q', '', '', 'this', '', '', '', 'A', '', '', 'that', ''] // split into array  
+            .filter (el => el != '' && el != ' ') // ['Q', 'this', 'A', 'that'] // remove spaces 
+            // .map((val, i, arr) => {if (!i) {console.log(`array:`, arr);}; return val}) // tool
+        })
+        // this map is more like a forEach
+        .forEach ((faq, i) => { // faq is an array of words
+            // note dont overwrite i 
+            /* i= 5  ***(example from old testing data)***
+                faq = [ 'Q', 'why', 'do', 'i', 'need', 'to', 'install',  'a', 'virtual',  'machine\nA', 
+                        'because', 'cross', 'platform', 'support', 'is', 'a', 'bit', 'janky', 'without',  'a', 'vm' ]  */
+            Object.freeze(faq); // frozen
+
+            // each filter down will most likely have more matches
+            // thus more results but also less related results
+
+            // strict comparison
+            if (filterStrict){ 
+                txt.forEach( userKeyword => { // [ 'install', 'vm', 'onto', 'computer' ]
+                    const findKeyword = faq.find( faqKeyword => faqKeyword.toLowerCase() == userKeyword.toLowerCase() ); 
+                    // returns true or undefined
+
+                    // if keyword not found exit else store result
+                    if (!findKeyword) return; // if undefined return // foreach return not .map
+
+                    matchedIndex.add(i);
+                    matchedKeywords.add(userKeyword);
+                });
+            }
+
+            // partially strict comparison
+            if (filterSemiStrict) { 
+                console.warn(`need to fix settings at ln:315`);
+                const temp = [...nonStrictComparison([faqWithSpaces[i]], txt, {consecutive: consecutiveCount, bool: true})]; // todo fix settings
+
+                if (temp.length >! 0) return;  // return if match not found
+                // else match found and continue
+
+                matchedIndex.add(i);
+                temp.forEach( key => matchedKeywords.add(key) );
+            }; 
+
+            // daniel's partial comparison
+            if (filterParial) { // todo
+                partialComparison(faq, txt); // todo settings
+            }
+
+            // todo filterNonConsecutivePartialStrict
+            // strict matching of keywords the same length as keyword
+            // example vm and vm-windows
+            // matching smaller than consecutive
+
+        }); // end FAQ.forEach();
+    
+        // cleaner debugging output // todo create debug boolean setting
+        if (true) {
+            console.log(`>>>>>>>>>>>>> results >>>>>>>>>>>>>`);
+            console.log(`- Filter Types -`);
+            console.log(`filterStrict: `, filterStrict);
+            console.log(`filterSemiStrict: `, filterSemiStrict);
+            console.log(`filterParial: `, filterParial);
+            console.log(``);
+            console.log(`- Filter Results -`);
+            console.log(`matchedKeywords: `, [...matchedKeywords]);
+            console.log(`matchedIndex: `, [...matchedIndex]);
+            console.log(`Data-type: `, Set);
+            console.log(``);
+        }
+        
+    console.log(`   ----------------`);
+
+    // array/ set of indexes that had a keyword match
+    // set eliminates duplicatation but needs to be spread and returned within array
+    return [...matchedIndex];
+}
+
+// ---------------------- * Main execution/ controller/ exported function * ---------------------- //
+
+// defaults stored as a global viarable 
+// to avoid some DRY duplication and to optimize declaration
+// meaning we only have to change defaults once
+// reason why defaults are assigned twice matters
+    // first to aid whoever calls the exported function (refer as caller)
+        // it shows them what variables they have access to
+        // and the expected data types for those variables
+    // the second reason they are assigned twice is due to the nature of objects
+    // unfortunatly if the caller changes one variables the other dependant variables would be lost
+    // in order to ensure that the caller can change a few specific variables without
+        // losing the other declared paramerters
+    // we thus need to define them outside of the function paramerters
+    // however if we move the defaults out of the paramerters
+    // the caller wont have access to/ be able to see which variables they have access to
+// hence the DRY duplication of defaults
+// the global viarable for defaults exist to simplify the DRY code
+// these settings are meant to allow the admin/ mod to adjust the functionality of the FAQ as needed
+// const defaultValues = {
+//     wordsToIgnore: blacklistKeywords, 
+//     punctuationToReplace: punctuationArr, 
+//     punctuationReplaceChar: '', 
+//     filterStrict: true, 
+//     filterSemiStrict: true, 
+//     filterParial: true,
+//     consecutiveCount: 3 
+// }
+
 // consider moving main function to the top of the scope - functions are hoisted
 // this function will construct the FAQ output message for the chat
-// instead of the normal way of declaring parameters the function accepts an object of settings // wip
+// instead of the normal way of declaring parameters the function accepts an object of settings
     // this allows the programer to choose which paramters they wish to declare
     // and in what order, this also makes it easier to add additional parameters later
     // without having to make major changes elsewhere in the code
@@ -187,49 +396,102 @@ const filterFAQ = function (userInputArr, FAQarr, strict = { bool: false, consec
 const outputFAQ = function (
     userTxt = ``, // clean user message string (can be multi-lined)
     FAQquestions = [``], // array of FAQ current format array of string ['Q: this. /n A: that.'] 
+    settings = new Controller(['']) // Defaults doesnt have the FAQ array 
     // unforseen error: when trying to alter one or more keywords in settings you overwrite the entire object, deleting the other defaults
-    // abstraction of settings
-    settings = { 
-        wordsToIgnore: blacklistKeywords, // common words that result in a false positive when comparing
-        punctuationToReplace: punctuationArr, // array of punctuation to replace with '' when comparing string
-        punctuationReplaceChar: '', // character to replace punctuation
-        strictFilter: false, // strict string comparison or partial comparison 
-        consecutiveMatch: 3 // how many consecutive characters need to match in a parial comparison
-    }) {
+        // this error is being accounted for by declaring the defaults twice
+    // setting abstraction
+    // settings = { 
+    //     // *main functionality
+    //     wordsToIgnore: [...defaultValues.wordsToIgnore], // common words that result in a false positive when comparing
+    //     punctuationToReplace: [...defaultValues.punctuationToReplace], // array of punctuation to replace with '' when comparing string
+    //     punctuationReplaceChar: defaultValues.punctuationReplaceChar, // character to replace punctuation
+
+    //     // *filter functionality
+    //     // filter controls how expansive the FAQ results may be
+    //         // depending on how many cases are true more results would be displayed 
+    //         // depending on the respective strictness setting
+    //         // note that although these are their own subsection
+    //             // I did not split them into their own subsection 
+    //             // that would overcomplicate calling this function even futher
+    //     filterStrict: defaultValues.filterStrict, // strict word comparison
+    //     // following filters depended on consecutiveCount
+    //         filterSemiStrict: defaultValues.filterSemiStrict, // partial word comparison - first consecutive characters
+    //         filterParial: defaultValues.filterParial, // partial character comparison - anywhere consecutive characters
+
+    //     consecutiveCount: defaultValues.consecutiveCount // how many consecutive characters need to match in a parial comparison
+    // }
+    ) {
 
     // a litte destructoring // avoids having to use settings. for every variable
+        // like how we are using defaultValues.
     // using destructoring as a practical way of redefining undefined settings
-    // re-assigning defaults because if they aren't in the new settings parameters this function will break
-    // technically to avoid DRY you would not declare them in the parameters but then the dev cant see what 
-    // the variables are for and how to use them
-    // debug ensure that this destructoring doesn't overwrite redefined parameters but act mainly as defaults
-    const { 
-        wordsToIgnore = blacklistKeywords, 
-        punctuationToReplace = punctuationArr, 
-        punctuationReplaceChar = '', 
-        strictFilter = false, 
-        consecutiveMatch = 3
+    // all of these variables need to exist in the scope of this function
+    const { // todo cut description from paramerter list
+        wordsToIgnore,
+        punctuationToReplace,
+        punctuationReplaceChar,
+        filterStrict,
+        filterSemiStrict,
+        filterParial,
+        consecutiveCount       
     } = settings; 
+    // these settings would be split into new objects wherever they are relevant
+    // within the sub functions of this module the defaults would not be redined again
+        // the sub functions will rely on this function to handle defaults
+        // however the sub functions will have null equivalent default values
+            // mainly to indicate expected data types
+    // most of the sub functions of this module will have their own settings object
+        // this is to manage the repective function and allow for more modular execution
+
+    const pad = 25; // delete
+    console.log(`--- settings debugger ---`);
+    console.log(`wordsToIgnore?`.padEnd(pad, ' '),':', wordsToIgnore.length > 0);
+    console.log(`punctuationToReplace?`.padEnd(pad, ' '),':', punctuationToReplace.length > 0);
+    console.log(`punctuationReplaceChar`.padEnd(pad, ' '),':', `'${punctuationReplaceChar}'`);
+    console.log(`filterStrict?`.padEnd(pad, ' '),':', filterStrict);
+    console.log(`filterSemiStrict?`.padEnd(pad, ' '),':', filterSemiStrict);
+    console.log(`filterParial?`.padEnd(pad, ' '),':', filterParial);
+    console.log(`consecutiveCount`.padEnd(pad, ' '),':', consecutiveCount);
+    console.log(`--- * ---`);
+    console.log(``);
+
+    // settings objects // todo remove this functionality from the functions
+    // just let them do what they should and no more
+    // const   filter = {  },
+    //         replace = { punctuationArr, replacementChar }
 
     let text = userTxt.slice(0); // make a copy
     const FAQ = [...FAQquestions]; // copy
-    const filteredFAQ = []; 
+
+    console.log(`Checkpoint ln:360`); 
 
     // if there is something to replace then replace it
     // accepts str returns str
-    if (punctuationToReplace.length > 0 ) text = replaceByArray(text, punctuationToReplace, punctuationReplaceChar);
+    if ( punctuationToReplace.length > 0 ) text = replaceByArray(text, { punctuationArray: punctuationToReplace, 
+                                                                        replacementChar: punctuationReplaceChar });
+
+    console.log(`Checkpoint ln:367`); 
 
     text = text.split(' '); // makes string an array
 
     // accepts array returns array
     if (wordsToIgnore.length > 0) text = removeFalsePositives(text, wordsToIgnore);
     
+    console.log(`Checkpoint ln:374`); // debug down
+    
     // get index for filtering the FAQ // array of indexes
-    const indexArray = filterFAQ(text, FAQ, {bool: strictFilter, consecutive: consecutiveMatch}, {bool: true}); 
+    // const indexArray = filterFAQ(text, FAQ, {bool: filterStrict, consecutive: consecutiveCount}, {bool: true}); 
+    const indexArray = filterFAQ(text, settings); 
+
+    console.log(`Checkpoint ln:379`); // currently in filterFAQ debugging
+
+    const filteredFAQ = []; // output
 
     indexArray.forEach(index => {
         filteredFAQ.push(FAQ[index]);
     });
+
+    console.log(`Checkpoint ln:387`); 
 
     // debug // delete
     console.log(`FAQ:`); 
@@ -245,6 +507,164 @@ const outputFAQ = function (
     return ( filteredFAQ.length > 0 ) ? [ ...new Set(filteredFAQ)].join('\n') : '       I failed to compile any FAQ related to your problem.'; // string
 }
 
-export { outputFAQ }; 
+class Settings { // base 
+    constructor() {
+        
+    }
+
+    execute (value = null) {
+        return value;
+    }
+
+    test (testArr = []) {
+        testArr.forEach(el => this.execute(el));
+        return testArr;
+    }
+}
+
+// default abstracts the settings for FAQ controller while still providing access to its functionality
+class Defaults extends Settings {
+    // modern ES6 convention using _ for private variables
+    // assigning defaults outside of constructor to allow only specific settings to be changed
+    // instead of forcing dev to assign all
+    _wordsToIgnore = blacklistKeywords;
+    _punctuationToReplace = punctuationArr;
+    _punctuationReplaceChar = '';
+    _filterStrict = true;
+    _filterSemiStrict = true;
+    _filterParial = true;
+    _consecutiveCount = 3;
+    
+    // defaults act as the parameters for settings hence why we extend
+    constructor() { 
+        super() 
+        this._settings = {
+           wordsToIgnore          : this._wordsToIgnore, 
+           punctuationToReplace   : this._punctuationToReplace, 
+           punctuationReplaceChar : this._punctuationReplaceChar, 
+           filterStrict           : this._filterStrict, 
+           filterSemiStrict       : this._filterSemiStrict, 
+           filterParial           : this._filterParial, 
+           consecutiveCount       : this._consecutiveCount
+        };
+    }
+
+    // main getter function
+    get settings () {
+        return this._settings;
+    }
+
+    // set functions to overwrite single settings
+    // unfortunatly since this isnt typescript we can't assign default datatypes
+    // consider abstracting this class to a typescript file
+    set wordsToIgnore (arr = [...blacklistKeywords]) {
+        return this._wordsToIgnore = arr;
+    }
+
+    set punctuationToReplace (arr = [...punctuationArr]) {
+        return this._punctuationToReplace = arr;
+    }
+
+    set punctuationReplaceChar (str = '') {
+        return this._punctuationReplaceChar = str;
+    }
+
+    set filterStrict (bool = true) {
+        return this._filterStrict = bool;
+    }
+
+    set filterSemiStrict (bool = true) {
+        return this._filterSemiStrict = bool;
+    }
+
+    set filterParial (bool = true) {
+        return this._filterParial = bool;
+    }
+
+    set consecutiveCount (int = 3) {
+        return this._consecutiveCount = int;
+    }
+
+    // get functions
+    get wordsToIgnore () {
+        return this._wordsToIgnore;
+    }
+
+    get punctuationToReplace () {
+        return this._punctuationToReplace;
+    }
+
+    get punctuationReplaceChar () {
+        return this._punctuationReplaceChar;
+    }
+
+    get filterStrict () {
+        return this._filterStrict;
+    }
+
+    get filterSemiStrict () {
+        return this._filterSemiStrict;
+    }
+
+    get filterParial () {
+        return this._filterParial;
+    }
+
+    get consecutiveCount () {
+        return this._consecutiveCount;
+    }
+}
+
+// this is the controller for FAQ settings
+    // to use this controller you just have to run execute
+    // constructor will ensure that you have the FAQ
+        // it also ensures that you don't have to define FAQ everytime you call executable
+    // the execute runs on the user message
+    // you can change any of the settings through their base set methods
+    // by not changing the variables their assumed defaults will be used
+class Controller extends Defaults { // base for controller
+    _FAQ;
+    constructor (faqArr) {
+        super();
+        this._FAQ = faqArr;
+        if (!Array.isArray(this.FAQ)) 
+        throw new Error(`Failed to initialize FAQ, -${FAQ}-. In order for the controller to function it requires an array of FAQ Questions and Answers. Questions and their respective Answer be a single combined entry within the array. ex ['Q... A...', 'Q... A...'] `);
+    }
+
+    set FAQ (arr = ['']) { return this._FAQ = arr }
+    get FAQ () { return this._FAQ }
+
+    test (msgArr = ['']) {
+        msgArr.forEach ((msg, i) => {
+            console.log(`- testing case #`, i +1, '-');
+            console.log(`User: ${msg}`);
+            console.log(`---`);
+            try { // just to catch unforseen errors
+                console.log(`FAQ Trace:`);
+                this.execute(msg);
+            } catch (error) {
+                console.warn(`------ FAQ failed ------`);
+                console.error(error);
+                console.log(`------ * ------`);
+            } 
+            console.log(`-- end case #`, i +1, '--');
+            console.log(``);
+        });
+
+        return msgArr;
+    }
+
+    execute (msg = '') {
+        outputFAQ(msg, this.FAQ, this.settings); // WIP 
+    }
+}
+
+// ---------------------- * Module End * ---------------------- //
+
+// the Controller it the control unit for this module
+// due to the strict handling of the data flow, the controller makes it easier to use this module
+// it is also the best way to expand the functionality with minimal effort
+// where to add more features or to give 'safer' control to the caller
+export { Controller }; 
 
 // refactor change some arrays to sets to eliminate duplication 

@@ -39,7 +39,7 @@ BOT: Thank you for contacting support, your ticked has been marked as resolved.
 
 // created a script execution keyword execute chatbot.js directly (npm run faq)
 // I am using this block to test the FAQ function
-import { outputFAQ } from './outputFAQ.js';
+import { Controller } from './outputFAQ.js';
 
 console.log(``);
 console.log(`-------------- FAQ --------------`);
@@ -123,39 +123,45 @@ const userMessages = [
     'What is the best work trip you have ever taken?'
 ];
 
+const FAQ = new Controller(faqInputArray);
+
+FAQ.test ([userMessages[0]]);
+
 // very DRY, I dont care
-if (true) { // bulk
-    userMessages.forEach((question, i) => {  
-    console.log(`- testing case #`, i +1, '-');
-    console.log(`User: ${question}`);
-    console.log(`---`);
-    let output = 'ERROR';
-    try { // just to catch unforseen errors
-        console.log(`FAQ Trace:`);
-        output = outputFAQ(question, faqInputArray);
-    } catch (error) {
-        console.error(`FAQ failed`, error);
-    } 
-    // console.log(`Result:\n${output}`);
-    console.log(`-- end case #`, i +1, '--');
-    console.log(``);
-})} else { // single
-    const [question] = userMessages.slice(-1);
-    console.log(`- testing case #`, userMessages.length -1, '-');
-    console.log(`User: ${question}`);
-    console.log(`---`);
-    try { // just to catch unforseen errors
-        console.log(`FAQ Trace:`);
-        const output = outputFAQ(question, faqInputArray);
-        console.log(`Output:\n${output}`);
-    } catch (error) {
-        console.warn(` === FAQ failed === `);
-        console.error(error);
-        console.log(``);
-    } 
-    console.log(`-- end case #`, userMessages.length -1, '--');
-    console.log(``);
-}
+// if (false) { // bulk
+//     userMessages.forEach((question, i) => {  
+//     console.log(`- testing case #`, i +1, '-');
+//     console.log(`User: ${question}`);
+//     console.log(`---`);
+//     let output = 'ERROR';
+//     try { // just to catch unforseen errors
+//         console.log(`FAQ Trace:`);
+//         output = outputFAQ(question, faqInputArray);
+//     } catch (error) {
+//         console.error(`FAQ failed`, error);
+//     } 
+//     // console.log(`Result:\n${output}`);
+//     console.log(`-- end case #`, i +1, '--');
+//     console.log(``);
+// })} else { // single
+//     const [question] = userMessages.slice(-1);
+//     console.log(`- testing case #`, userMessages.length -1, '-');
+//     console.log(`User: ${question}`);
+//     console.log(`---`);
+//     // const obj = {}
+//     try { // just to catch unforseen errors
+//         console.log(`FAQ Trace:`);
+//         // const output = outputFAQ(question, faqInputArray, {consecutiveCount: 4});
+//         const output = outputFAQ(question, faqInputArray);
+//         console.log(`Output:\n${output}`);
+//     } catch (error) {
+//         console.warn(` === FAQ failed === `);
+//         console.error(error);
+//         console.log(``);
+//     } 
+//     console.log(`-- end case #`, userMessages.length -1, '--');
+//     console.log(``);
+// }
 
 console.log(``);
 console.log(`========================= END =========================`);
