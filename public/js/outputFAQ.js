@@ -9,65 +9,91 @@ import { blacklistKeywords, punctuationArr } from "./settings.js";
 //     }
 // }
 
-// const formatObjects = (output, parametersObj = {}, name = '') => { return { name, paramerters: parametersObj, output } };
-
 // ---------------------- * Helper functions * ---------------------- //
+// helper function abstraction of replacePunctuationByArray
+// same functionality as replacePunctuationByArray but without strict settings
+// this is to allow other executions with same method if so desired
+const replaceByArray = (strToReplace = '', arrToReplace = [''], replacementStr = '') => 
+    { arrToReplace.forEach(str => strToReplace.replaceAll(`${str}`, `${replacementStr}`)) }
+
 // replace characters function
-// DRY defaults but this function has a settings object that has to be handled strictly
-const replaceByArray = function (text = '', settings = { punctuationArray : [ ...punctuationArr ], replacementChar : ' '}) {
+// const replacePunctuationByArray = function (text = '', settings = { punctuationArray : [ ...punctuationArr ], replacementChar : ' '}) {
+const replacePunctuationByArray = function (text = '', settings = new Defaults()) {
     let output = text.slice(0); // dont mutate parameters // replaceAll doesn't mutate it returns new str
 
-    // warning // todo overwrite any nonexisting defaults
-    // destructoring in order to pass objects around as parameters
+    // destructoring for required settings
     const {punctuationArray, replacementChar} = settings;
 
-    punctuationArray.forEach (char => { output = output.replaceAll(`${char}`, `${replacementChar}`); }); 
+    // console.warn(`DEBUG> REQUIRE`, '{punctuationArray, replacementChar}');
+    // console.warn(`DEBUG> input>`, `${text}, settings`);
 
-    // dont overcomplicate it return expected result and only pass objects in main function
-    // return { input: text, settings : { punctuationArray, replacementChar}, output };
+    replaceByArray(output, punctuationArray, replacementChar);
+
+    // punctuationArray.forEach (char => { output = output.replaceAll(`${char}`, `${replacementChar}`); }); 
+    // console.warn(`output`, output);
+    // console.log(``);
+
     return output;
-    // return formatObjects(replaceByArray.name, {text, punctuationArray, replacementChar}, output);
 }
 
 // this function removes invalid keywords from an array of keywords
 // return a copy of an array that has the correct keywords removed
 // only define defaults as the correct data type of a null equivalent, let the main function handle data defaults
 const removeFalsePositives = function(strArr = [''], keywordsToRemove = ['']) { 
+    // console.warn(`DEBUG> REQUIRE> no-settings`, 'strArr, keywordsToRemove');
+    // console.warn(`DEBUG> input>`, `${strArr}, ${keywordsToRemove}`);
+
     // make a copy of the original then filter array
         // by not returning the entries that are found within the remove array
     const filteredArr = [ ...strArr ]
             .filter (word => !keywordsToRemove.find (remove => word.toLowerCase() == remove.toLowerCase(), false)); 
+
+    // console.warn(`output`, filteredArr);
+    // console.log(``);
 
     return filteredArr; // return new array rather than mutating parameter
 }
 
 // ---------------------- * Comparison functions * ---------------------- //
 
+// note might need to refactor subfunctions of filter due to duplicated code
+// same input and several steps identical
+
 // dont mutate parameters
 // Partial string comparison by comparing a certain amount of character instead of the whole word
 // compares from the start of the word up to the consecutive length for both sets of keywords
 const nonStrictComparison = function (
-        FAQ = [], // FROZEN FAQ is an array of words 
+        FAQ = [], // FROZEN FAQ is an array of words - this isn't the original FAQ array but a manipulation
         MSG = [], // array of words 
-        settings = { bool: true, consecutive: 3 } // be very careful with this variable // todo fix all object parameters
+        // settings = { bool: true, consecutive: 3 } // be very careful with this variable // todo fix all object 
+        // note bool was absolete in this context
+        settings = new Controller([''])
 ) {
+    // destructoring required settings
+    const { consecutiveCount } = settings;
+
+    // console.warn(`DEBUG> REQUIRE`, '{consecutiveCount}');
+    // console.warn(`faq`, FAQ);
+    // console.warn(`msg`, MSG);
+    // console.log(``);
+
     // .map((val, i, arr) => {if (!i) {console.log(`array:`, arr);}; return val}) // use this to see data  
     const   faq = [...FAQ] // array of char ['Q',  ' ', 'w', 'h', 'y', ' ', 'd', 'o', ' ', 'i']
                         .join('').split(' ') // ['Q', 'why','do','i','need',o','install','a', etc]
                         // remove everything smaller than consecutive length
-                        .filter( (word) => !(word.length < settings.consecutive) ), // ['why','need', 'install','virtual','machine, etc]
+                        .filter( (word) => !(word.length < consecutiveCount) ), // ['why','need', 'install','virtual','machine, etc]
             msg = [...MSG] // [ 'install', 'vm', 'onto', 'computer' ]
-                        .filter( (word) => !(word.length < settings.consecutive) ); // [ 'install', 'onto', 'computer' ]
+                        .filter( (word) => !(word.length < consecutiveCount) ); // [ 'install', 'onto', 'computer' ]
     
     const match = [];
 
     msg.forEach( (msgKeyword, i) => {
         // slice gives you exactly the same length as consecutive
-        const message = msgKeyword.slice(0, settings.consecutive).toLowerCase(); // ['ins','ont','com']
+        const message = msgKeyword.slice(0, consecutiveCount).toLowerCase(); // ['ins','ont','com']
 
         faq.forEach( (faqKeyword) => {
             // converting keyword to lowercase for direct string comparison
-            const answer = faqKeyword.slice(0, settings.consecutive).toLowerCase(); // ['why','nee', 'ins', etc]
+            const answer = faqKeyword.slice(0, consecutiveCount).toLowerCase(); // ['why','nee', 'ins', etc]
 
             if (message != answer) return match;
             // else
@@ -75,11 +101,14 @@ const nonStrictComparison = function (
         } );
     } );
 
+    // console.warn(`output`, match);
+    // console.log(``);
+
     return match; 
 }
 
 // refactor // todo split existing comparison filters each into their own sub function
-// note we currentlt have strict, strictPartial & partial
+// note we currently have strict, strictPartial & partial
 
 // refactor version of partial matching by daniel
 // refactor work it back into the main logic the start should be the same as current logic 
@@ -89,32 +118,42 @@ const nonStrictComparison = function (
 const partialComparison = function (
     FAQ = [], // FROZEN FAQ is an array of words 
     MSG = [], // array of words 
-    settings = { bool: true, consecutive: 3 } // be very careful with this variable // todo fix all object parameters
+    // settings = { bool: true, consecutive: 3 } // be very careful with this variable // todo fix all object parameters
+    settings = new Controller([''])
 ) {
-    console.warn(`partialComparison method still needs to be worked into the filter matching`);
+    // destructoring required settings
+    const { consecutiveCount } = settings;
+
+    // console.warn(`DEBUG> REQUIRE`, '{consecutiveCount}');
+    // console.warn(`faq`, FAQ);
+    // console.warn(`msg`, MSG);
+
+    // debug verify if this is working as expected as well as other comparison functions
+
+
     //note we should probably do a strict check for words smaller than settings.consecutive, to catch things like 'VM'
     // .map((val, i, arr) => {if (!i) {console.log(`array:`, arr);}; return val}) // use this to see data  
     const   faq = [...FAQ] // array of char ['Q',  ' ', 'w', 'h', 'y', ' ', 'd', 'o', ' ', 'i']
                         .join('').split(' ') // ['Q', 'why','do','i','need',o','install','a', etc]
                         // remove everything smaller than consecutive length
-                        .filter( (word) => !(word.length < settings.consecutive) ), // ['why','need', 'install','virtual','machine, etc]
+                        .filter( (word) => !(word.length < consecutiveCount) ), // ['why','need', 'install','virtual','machine, etc]
             msg = [...MSG] // [ 'install', 'vm', 'onto', 'computer' ]
-                        .filter( (word) => !(word.length < settings.consecutive) ); // [ 'install', 'onto', 'computer' ]
+                        .filter( (word) => !(word.length < consecutiveCount) ); // [ 'install', 'onto', 'computer' ]
     const match = [];
     //just making copies, variable naming is terrible i know
     const faq2 = [];
     const msg2 = [];
-    //taking every substring of length == settings.consecutive and pushing to faq2
+    //taking every substring of length == consecutive and pushing to faq2
     faq.forEach((word) => {
-        for(let i = 0; i + settings.consecutive <= word.length; i++){
-            let tempWord = word.slice(i, i + settings.consecutive);
+        for(let i = 0; i + consecutiveCount <= word.length; i++){
+            let tempWord = word.slice(i, i + consecutiveCount);
             faq2.push(tempWord);
         }
     })
-    //taking every substring of length == settings.consecutive and pushing to msg2
+    //taking every substring of length == consecutiveCount and pushing to msg2
     msg.forEach((word) => {
-        for(let i = 0; i + settings.consecutive <= word.length; i++){
-            let tempWord = word.slice(i, i + settings.consecutive);
+        for(let i = 0; i + consecutiveCount <= word.length; i++){
+            let tempWord = word.slice(i, i + consecutiveCount);
             msg2.push(tempWord);
         }
     })
@@ -129,144 +168,148 @@ const partialComparison = function (
             }
         })
     });
-    console.log('Partial matches: ', match);
+
+    // console.warn(`output`, match);
+    // console.log(``);
+
     return match;
 }
 
 // ---------------------- * Main Filter Logic * ---------------------- //
 
 // const filterFAQ = function (userInputArr, FAQarr, strict = { bool: false, consecutive: 3 }, trace = { bool: true }) { 
-const filterFAQbackup = function (userInputArr, settings = new Controller([''])) { // Defaults doesnt have an FAQ property
-    // remove the default but also enforce the correct type
-    const FAQ = (  Array.isArray(settings.FAQ) ) ? [ ...FAQarr ] : [ '' ]; // copy
-    const txt = (  Array.isArray(userInputArr) ) ? [ ...userInputArr ] : [ '' ]; // copy
+// const filterFAQbackup = function (userInputArr, settings = new Controller([''])) { // Defaults doesnt have an FAQ property
+//     // remove the default but also enforce the correct type
+//     const FAQ = (  Array.isArray(settings.FAQ) ) ? [ ...FAQarr ] : [ '' ]; // copy
+//     const txt = (  Array.isArray(userInputArr) ) ? [ ...userInputArr ] : [ '' ]; // copy
 
-    // const FAQ = (  Array.isArray(FAQarr) ) ? [ ...FAQarr ] : [ '' ]; // copy
-    // const txt = (  Array.isArray(userInputArr) ) ? [ ...userInputArr ] : [ '' ]; // copy
+//     // const FAQ = (  Array.isArray(FAQarr) ) ? [ ...FAQarr ] : [ '' ]; // copy
+//     // const txt = (  Array.isArray(userInputArr) ) ? [ ...userInputArr ] : [ '' ]; // copy
 
-    // destructoring dependancies
-    const { filterParial, filterSemiStrict, filterStrict, consecutiveCount } = settings;
+//     // destructoring dependancies
+//     const { filterParial, filterSemiStrict, filterStrict, consecutiveCount } = settings;
 
-    // store array of index rather than filter array to preserve original copy
-    // and allow a new array to be filtered by the index rather than the content
-    const matchedKeywords = new Set(), // todo using single set for compilation 
-          matchedIndex    = new Set();
+//     // store array of index rather than filter array to preserve original copy
+//     // and allow a new array to be filtered by the index rather than the content
+//     const matchedKeywords = new Set(), // todo using single set for compilation 
+//           matchedIndex    = new Set();
 
-    const outputIndexArray = [], matchedKeywordsArray = []; 
-    const outputIndexArrayP = [], matchedKeywordsArrayP = []; // delete just for testing
-    let faqWithSpaces;
-    let faqWithSpacesP = [];
+//     const outputIndexArray = [], matchedKeywordsArray = []; 
+//     const outputIndexArrayP = [], matchedKeywordsArrayP = []; // delete just for testing
+//     let faqWithSpaces;
+//     let faqWithSpacesP = [];
 
-    FAQ // ['Q: this. A: that.'] 
-        .map(sentenceStr => sentenceStr.replaceAll('\n', ' ')) // remove \n tags before we split else headache
-        .map (sentenceStr => {
-            faqWithSpaces =  replaceByArray( sentenceStr, { punctuationArr, replacementChar: '' } ) ;
+//     FAQ // ['Q: this. A: that.'] 
+//         .map(sentenceStr => sentenceStr.replaceAll('\n', ' ')) // remove \n tags before we split else headache
+//         .map (sentenceStr => {
+//             faqWithSpaces =  replacePunctuationByArray( sentenceStr, { punctuationArr, replacementChar: '' } ) ;
 
-            faqWithSpacesP.push( replaceByArray(sentenceStr, { punctuationArr, replacementChar: '' }) );
+//             faqWithSpacesP.push( replacePunctuationByArray(sentenceStr, { punctuationArr, replacementChar: '' }) );
 
-            return faqWithSpaces // ['Q  this   A  that '] // remove punctuation
-            .split (' ') // ['Q', '', '', 'this', '', '', '', 'A', '', '', 'that', ''] // split into array  
-            .filter (el => el != '' && el != ' ') // ['Q', 'this', 'A', 'that'] // remove spaces 
-            // .map((val, i, arr) => {if (!i) {console.log(`array:`, arr);}; return val}) // tool
-        })
-        // this map is more like a forEach
-        .map ((faq, i, ar) => { // faq is an array of words
-            /* i= 5 
-                faq = [ 'Q', 'why', 'do', 'i', 'need', 'to', 'install',  'a', 'virtual',  'machine\nA', 
-                        'because', 'cross', 'platform', 'support', 'is', 'a', 'bit', 'janky', 'without',  'a', 'vm' ]  */
-            Object.freeze(faq); // frozen
+//             return faqWithSpaces // ['Q  this   A  that '] // remove punctuation
+//             .split (' ') // ['Q', '', '', 'this', '', '', '', 'A', '', '', 'that', ''] // split into array  
+//             .filter (el => el != '' && el != ' ') // ['Q', 'this', 'A', 'that'] // remove spaces 
+//             // .map((val, i, arr) => {if (!i) {console.log(`array:`, arr);}; return val}) // tool
+//         })
+//         // this map is more like a forEach
+//         .map ((faq, i, ar) => { // faq is an array of words
+//             /* i= 5 
+//                 faq = [ 'Q', 'why', 'do', 'i', 'need', 'to', 'install',  'a', 'virtual',  'machine\nA', 
+//                         'because', 'cross', 'platform', 'support', 'is', 'a', 'bit', 'janky', 'without',  'a', 'vm' ]  */
+//             Object.freeze(faq); // frozen
 
-            // refactor use sets // priority **
-            // note calculate strict keywords add them to set
-            // note then add partial keywords and test all before returning functionality
-            // note if partial not enabled then dont add them to keywords
+//             // refactor use sets // priority **
+//             // note calculate strict keywords add them to set
+//             // note then add partial keywords and test all before returning functionality
+//             // note if partial not enabled then dont add them to keywords
 
-            // note dont overwrite i 
-            // non strict comparison
-            if (true) { // debug delete once working
-            // if (!strict.bool) { // debug uncomment once working
+//             // note dont overwrite i 
+//             // non strict comparison
+//             if (true) { // debug delete once working
+//             // if (!strict.bool) { // debug uncomment once working
 
-            // note words like chemistry and biochemistry wont match with current partial Matching
-            // todo revise or expand working functionality to include partial matches within words
-                // const temp = [...nonStrictComparison(faqWithSpaces, txt, strict)];
-                const temp = [...nonStrictComparison(faqWithSpacesP[i], txt, strict)];
+//             // note words like chemistry and biochemistry wont match with current partial Matching
+//             // todo revise or expand working functionality to include partial matches within words
+//                 // const temp = [...nonStrictComparison(faqWithSpaces, txt, strict)];
+//                 const temp = [...nonStrictComparison(faqWithSpacesP[i], txt, strict)];
 
-                if (temp.length > 0) {  // match found
-                    outputIndexArrayP.push(i); // debug remove P once working and delete declaration
-                    matchedKeywordsArrayP.push( ...temp ); // debug remove P once working and delete declaration
-                }
+//                 if (temp.length > 0) {  // match found
+//                     outputIndexArrayP.push(i); // debug remove P once working and delete declaration
+//                     matchedKeywordsArrayP.push( ...temp ); // debug remove P once working and delete declaration
+//                 }
                 
-                // return faq; // remember to return with map // debug uncomment once working
-            }; // else strict comparison // idea do both rather than just one depending on bool
-            txt.forEach( (userKeyword, k, arr) => { // [ 'install', 'vm', 'onto', 'computer' ]
-                Object.freeze(userKeyword); // frozen
-                // let index;
-                const findKeyword = faq.find( (faqKeyword, j, arr) => {
-                    // index = j; // fixed there is your problem
-                    return faqKeyword.toLowerCase() == userKeyword.toLowerCase();
-                } ); // returns true or undefined
+//                 // return faq; // remember to return with map // debug uncomment once working
+//             }; // else strict comparison // idea do both rather than just one depending on bool
+//             txt.forEach( (userKeyword, k, arr) => { // [ 'install', 'vm', 'onto', 'computer' ]
+//                 Object.freeze(userKeyword); // frozen
+//                 // let index;
+//                 const findKeyword = faq.find( (faqKeyword, j, arr) => {
+//                     // index = j; // fixed there is your problem
+//                     return faqKeyword.toLowerCase() == userKeyword.toLowerCase();
+//                 } ); // returns true or undefined
 
-                // if keyword not found exit else store result
-                if (!findKeyword) return; // if undefined return // foreach return not .map
+//                 // if keyword not found exit else store result
+//                 if (!findKeyword) return; // if undefined return // foreach return not .map
 
-                // console.log(`storing result as index: keyword`,'-', index,':',key);
-                // console.log(`find i: arr`,k,':', t); // this is array of words within faq
-                // console.log(`foreach i:`,i); 
+//                 // console.log(`storing result as index: keyword`,'-', index,':',key);
+//                 // console.log(`find i: arr`,k,':', t); // this is array of words within faq
+//                 // console.log(`foreach i:`,i); 
 
-                outputIndexArray.push(i);
-                matchedKeywordsArray.push(userKeyword);
-            });
+//                 outputIndexArray.push(i);
+//                 matchedKeywordsArray.push(userKeyword);
+//             });
 
-            return faq; // remember to return with map // refactor this is a forEach, dont need to map
-        }); // end FAQ.map();
+//             return faq; // remember to return with map // refactor this is a forEach, dont need to map
+//         }); // end FAQ.map();
     
-        console.log(`>>>>>>>>>>>>> results >>>>>>>>>>>>>`);
-        // console.log(`expected results may now be missing matches due to updated junk data`);
-        console.log(`--- strict ---`); 
-        // console.log(`index:`, outputIndexArray, '||', 'expected result', [5]); // fixme use set to eliminate duplicates
-        // console.log(`keywords:`, matchedKeywordsArray, '||', 'expected result', ['install', 'vm']);
+//         console.log(`>>>>>>>>>>>>> results >>>>>>>>>>>>>`);
+//         // console.log(`expected results may now be missing matches due to updated junk data`);
+//         console.log(`--- strict ---`); 
+//         // console.log(`index:`, outputIndexArray, '||', 'expected result', [5]); // fixme use set to eliminate duplicates
+//         // console.log(`keywords:`, matchedKeywordsArray, '||', 'expected result', ['install', 'vm']);
 
-        console.log(`index:`, [...new Set(outputIndexArray)]); // fixme use set to eliminate duplicates
-        console.log(`keywords:`, [...new Set(matchedKeywordsArray)]);
-        console.log(``);
+//         console.log(`index:`, [...new Set(outputIndexArray)]); // fixme use set to eliminate duplicates
+//         console.log(`keywords:`, [...new Set(matchedKeywordsArray)]);
+//         console.log(``);
 
-        console.log(`--- Partial ---`);
-        // console.log(`index:`, outputIndexArrayP, '||', 'expected result', [4, 5]); 
-        // console.log(`keywords:`, matchedKeywordsArrayP, '||', 'expected result', ['install']); // fixme use set to eliminate duplicates
+//         console.log(`--- Partial ---`);
+//         // console.log(`index:`, outputIndexArrayP, '||', 'expected result', [4, 5]); 
+//         // console.log(`keywords:`, matchedKeywordsArrayP, '||', 'expected result', ['install']); // fixme use set to eliminate duplicates
 
-        console.log(`index:`, [...new Set(outputIndexArrayP)]); // note thanks daniel
-        console.log(`keywords:`, [...new Set(matchedKeywordsArrayP)]); // fixme use set to eliminate duplicates
-        console.log(``);
+//         console.log(`index:`, [...new Set(outputIndexArrayP)]); // note thanks daniel
+//         console.log(`keywords:`, [...new Set(matchedKeywordsArrayP)]); // fixme use set to eliminate duplicates
+//         console.log(``);
         
-    // tracing exists in order to add more works to the filter
-    // this is a manual process but with some time most keywords will be relevant
-    if (trace.bool) {
-        //currently only outputing strict
-        console.log(`Matching Type :` , `${(strict.bool)? 'STRICT' : 'PARTIAL'}`); // todo strict and partial
-        // next two only works for strict // todo
-        // console.log(`Keywords      :`, ( matchedKeywordsArray.length > 0) ? [ ...new Set(matchedKeywordsArray)] : 'none'); // todo strict and partial
-        // console.log(`indexes       :`, outputIndexArray);
-    }
+//     // tracing exists in order to add more works to the filter
+//     // this is a manual process but with some time most keywords will be relevant
+//     if (trace.bool) {
+//         //currently only outputing strict
+//         console.log(`Matching Type :` , `${(strict.bool)? 'STRICT' : 'PARTIAL'}`); // todo strict and partial
+//         // next two only works for strict // todo
+//         // console.log(`Keywords      :`, ( matchedKeywordsArray.length > 0) ? [ ...new Set(matchedKeywordsArray)] : 'none'); // todo strict and partial
+//         // console.log(`indexes       :`, outputIndexArray);
+//     }
 
-    console.log(`   ----------------`);
+//     console.log(`   ----------------`);
 
-    // array of indexes that had a keyword match
-    // set eliminates any possible duplicates
-    // set needs to be spread because it's an object not an array
-    // return [ ...new Set(outputIndexArray) ]; 
-    // return [ ...new Set((strict.bool)? outputIndexArray : matchedKeywordsArrayP) ]; // returning keywords like a dumbass
-    return [ ...new Set((strict.bool)? outputIndexArray : outputIndexArrayP) ]; // delete outputIndexArrayP partial works
-}
+//     // array of indexes that had a keyword match
+//     // set eliminates any possible duplicates
+//     // set needs to be spread because it's an object not an array
+//     // return [ ...new Set(outputIndexArray) ]; 
+//     // return [ ...new Set((strict.bool)? outputIndexArray : matchedKeywordsArrayP) ]; // returning keywords like a dumbass
+//     return [ ...new Set((strict.bool)? outputIndexArray : outputIndexArrayP) ]; // delete outputIndexArrayP partial works
+// }
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // filter FAQ array for keywords that match the user input then returns the filtered FAQ array // I don't think this mutates either
 // dont pull defaults from top scope let the function supply them
 const filterFAQ = function (userInputArr, settings = new Controller([''])) { // Defaults doesnt have an FAQ property
+    // destructoring dependancies
+    const { filterParial, filterSemiStrict, filterStrict, consecutiveCount } = settings;
+
     // remove the default but also enforce the correct type
     const FAQ = (  Array.isArray(settings.FAQ) ) ? [ ...FAQarr ] : [ '' ]; // copy
     const txt = (  Array.isArray(userInputArr) ) ? [ ...userInputArr ] : [ '' ]; // copy
-
-    // destructoring dependancies
-    const { filterParial, filterSemiStrict, filterStrict, consecutiveCount } = settings;
 
     // store array of index rather than filter array to preserve original copy
     // and allow a new array to be filtered by the index rather than the content
@@ -278,11 +321,15 @@ const filterFAQ = function (userInputArr, settings = new Controller([''])) { // 
     FAQ // ['Q: this. A: that.'] 
         .map(sentenceStr => sentenceStr.replaceAll('\n', ' ')) // remove \n tags before we split else headache
         .map (sentenceStr => {
-            faqWithSpaces.push( replaceByArray(sentenceStr, { punctuationArr, replacementChar: '' }) ); // todo settings // fixme
+            faqWithSpaces.push( replacePunctuationByArray(sentenceStr, settings) ); // todo settings // fixme
+
+            // console.log(`>>>>>>>>>>>>>>>>>>>>>>>>>`);
+            // console.log(`faqWithSpaces-----`, faqWithSpaces);
 
             return faqWithSpaces // ['Q  this   A  that '] // remove punctuation
-            .split (' ') // ['Q', '', '', 'this', '', '', '', 'A', '', '', 'that', ''] // split into array  
-            .filter (el => el != '' && el != ' ') // ['Q', 'this', 'A', 'that'] // remove spaces 
+                // note due to changes in code faqWithSpaces is already in the correct format for filtering
+                // .split (' ') // ['Q', '', '', 'this', '', '', '', 'A', '', '', 'that', ''] // split into array  
+                .filter (el => el != '' && el != ' ') // ['Q', 'this', 'A', 'that'] // remove spaces 
             // .map((val, i, arr) => {if (!i) {console.log(`array:`, arr);}; return val}) // tool
         })
         // this map is more like a forEach
@@ -312,8 +359,7 @@ const filterFAQ = function (userInputArr, settings = new Controller([''])) { // 
 
             // partially strict comparison
             if (filterSemiStrict) { 
-                console.warn(`need to fix settings at ln:315`);
-                const temp = [...nonStrictComparison([faqWithSpaces[i]], txt, {consecutive: consecutiveCount, bool: true})]; // todo fix settings
+                const temp = [...nonStrictComparison([faqWithSpaces[i]], txt, settings)]; 
 
                 if (temp.length >! 0) return;  // return if match not found
                 // else match found and continue
@@ -323,8 +369,14 @@ const filterFAQ = function (userInputArr, settings = new Controller([''])) { // 
             }; 
 
             // daniel's partial comparison
-            if (filterParial) { // todo
-                partialComparison(faq, txt); // todo settings
+            // same logic as semi strict
+            if (filterParial) { 
+                const temp = partialComparison(faq, txt, settings); 
+
+                if (temp.length >! 0) return; 
+
+                matchedIndex.add(i);
+                temp.forEach( key => matchedKeywords.add(key) )
             }
 
             // todo filterNonConsecutivePartialStrict
@@ -335,19 +387,19 @@ const filterFAQ = function (userInputArr, settings = new Controller([''])) { // 
         }); // end FAQ.forEach();
     
         // cleaner debugging output // todo create debug boolean setting
-        if (true) {
-            console.log(`>>>>>>>>>>>>> results >>>>>>>>>>>>>`);
-            console.log(`- Filter Types -`);
-            console.log(`filterStrict: `, filterStrict);
-            console.log(`filterSemiStrict: `, filterSemiStrict);
-            console.log(`filterParial: `, filterParial);
-            console.log(``);
-            console.log(`- Filter Results -`);
-            console.log(`matchedKeywords: `, [...matchedKeywords]);
-            console.log(`matchedIndex: `, [...matchedIndex]);
-            console.log(`Data-type: `, Set);
-            console.log(``);
-        }
+        // if (true) {
+        //     console.log(`>>>>>>>>>>>>> results >>>>>>>>>>>>>`);
+        //     console.log(`- Filter Types -`);
+        //     console.log(`filterStrict: `, filterStrict);
+        //     console.log(`filterSemiStrict: `, filterSemiStrict);
+        //     console.log(`filterParial: `, filterParial);
+        //     console.log(``);
+        //     console.log(`- Filter Results -`);
+        //     console.log(`matchedKeywords: `, [...matchedKeywords]);
+        //     console.log(`matchedIndex: `, [...matchedIndex]);
+        //     console.log(`Data-type: `, Set);
+        //     console.log(``);
+        // }
         
     console.log(`   ----------------`);
 
@@ -443,47 +495,44 @@ const outputFAQ = function (
     // most of the sub functions of this module will have their own settings object
         // this is to manage the repective function and allow for more modular execution
 
-    const pad = 25; // delete
-    console.log(`--- settings debugger ---`);
-    console.log(`wordsToIgnore?`.padEnd(pad, ' '),':', wordsToIgnore.length > 0);
-    console.log(`punctuationToReplace?`.padEnd(pad, ' '),':', punctuationToReplace.length > 0);
-    console.log(`punctuationReplaceChar`.padEnd(pad, ' '),':', `'${punctuationReplaceChar}'`);
-    console.log(`filterStrict?`.padEnd(pad, ' '),':', filterStrict);
-    console.log(`filterSemiStrict?`.padEnd(pad, ' '),':', filterSemiStrict);
-    console.log(`filterParial?`.padEnd(pad, ' '),':', filterParial);
-    console.log(`consecutiveCount`.padEnd(pad, ' '),':', consecutiveCount);
-    console.log(`--- * ---`);
-    console.log(``);
+    // const pad = 25; // delete
+    // console.log(`--- settings debugger ---`);
+    // console.log(`wordsToIgnore?`.padEnd(pad, ' '),':', wordsToIgnore.length > 0);
+    // console.log(`punctuationToReplace?`.padEnd(pad, ' '),':', punctuationToReplace.length > 0);
+    // console.log(`punctuationReplaceChar`.padEnd(pad, ' '),':', `'${punctuationReplaceChar}'`);
+    // console.log(`filterStrict?`.padEnd(pad, ' '),':', filterStrict);
+    // console.log(`filterSemiStrict?`.padEnd(pad, ' '),':', filterSemiStrict);
+    // console.log(`filterParial?`.padEnd(pad, ' '),':', filterParial);
+    // console.log(`consecutiveCount`.padEnd(pad, ' '),':', consecutiveCount);
+    // console.log(`--- * ---`);
+    // console.log(``);
 
-    // settings objects // todo remove this functionality from the functions
-    // just let them do what they should and no more
-    // const   filter = {  },
-    //         replace = { punctuationArr, replacementChar }
-
-    let text = userTxt.slice(0); // make a copy
+      let text = userTxt.slice(0); // make a copy
     const FAQ = [...FAQquestions]; // copy
 
-    console.log(`Checkpoint ln:360`); 
+    // console.log(`Checkpoint ln:485`); 
 
     // if there is something to replace then replace it
     // accepts str returns str
-    if ( punctuationToReplace.length > 0 ) text = replaceByArray(text, { punctuationArray: punctuationToReplace, 
-                                                                        replacementChar: punctuationReplaceChar });
+    if ( punctuationToReplace.length > 0 ) text = replacePunctuationByArray(text, { punctuationArray: punctuationToReplace, 
+                                                                        replacementChar: punctuationReplaceChar }); // fixme
 
-    console.log(`Checkpoint ln:367`); 
+    // console.log(`Checkpoint ln:492`); 
 
     text = text.split(' '); // makes string an array
 
     // accepts array returns array
-    if (wordsToIgnore.length > 0) text = removeFalsePositives(text, wordsToIgnore);
+    if (wordsToIgnore.length > 0) text = removeFalsePositives(text, wordsToIgnore); 
     
-    console.log(`Checkpoint ln:374`); // debug down
+    // console.log(`Checkpoint ln:499`);
     
     // get index for filtering the FAQ // array of indexes
     // const indexArray = filterFAQ(text, FAQ, {bool: filterStrict, consecutive: consecutiveCount}, {bool: true}); 
+    // console.log(`--- text ---`, text);
+    // console.log(`--- settings ---`, settings);
     const indexArray = filterFAQ(text, settings); 
 
-    console.log(`Checkpoint ln:379`); // currently in filterFAQ debugging
+    // console.log(`Checkpoint ln:505`); 
 
     const filteredFAQ = []; // output
 
@@ -491,20 +540,19 @@ const outputFAQ = function (
         filteredFAQ.push(FAQ[index]);
     });
 
-    console.log(`Checkpoint ln:387`); 
+    // console.log(`Checkpoint ln:513`); 
 
     // debug // delete
-    console.log(`FAQ:`); 
+    // console.log(`FAQ:`); 
     // FAQquestions.forEach ( (str, i) => console.log(`#`,i,' - ', str.replace('A:', '        A:')) ); // like a genius forgot this is all 
-    filteredFAQ.forEach ( (str, i) => console.log(str.replace('A:', '        A:')) );
-    console.log(``);
-    console.log(`   Total Matches:`, [ ...new Set(filteredFAQ)].length);
-    // console.log(`Expected results:`, `strict -`, 1, '||', 'partial -', 2);
-    console.log(``);
+    // filteredFAQ.forEach ( (str, i) => console.log(str.replace('A:', '        A:')) );
+    // console.log(``);
+    // console.log(`   Total Matches:`, [ ...new Set(filteredFAQ)].length);
+    // console.log(``);
 
     // set is similar to an array except it cant hold duplicates and is an object not array
     // by spreading the set object '...' it can be converted into an array format
-    return ( filteredFAQ.length > 0 ) ? [ ...new Set(filteredFAQ)].join('\n') : '       I failed to compile any FAQ related to your problem.'; // string
+    return ( filteredFAQ.length > 0 ) ? [ ...new Set(filteredFAQ)].join('\n') : 'I failed to compile any FAQ related to your problem.'; // string
 }
 
 class Settings { // base 
@@ -553,6 +601,10 @@ class Defaults extends Settings {
     get settings () {
         return this._settings;
     }
+
+    // set addSetting (item) { // cant do this unless variables stored in a map
+    //     this.settings.push(item);
+    // }
 
     // set functions to overwrite single settings
     // unfortunatly since this isnt typescript we can't assign default datatypes
@@ -627,8 +679,8 @@ class Controller extends Defaults { // base for controller
     constructor (faqArr) {
         super();
         this._FAQ = faqArr;
-        if (!Array.isArray(this.FAQ)) 
-        throw new Error(`Failed to initialize FAQ, -${FAQ}-. In order for the controller to function it requires an array of FAQ Questions and Answers. Questions and their respective Answer be a single combined entry within the array. ex ['Q... A...', 'Q... A...'] `);
+        if ( !Array.isArray(this.FAQ) ) 
+            throw new Error(`Failed to initialize FAQ, -${FAQ}-. In order for the controller to function it requires an array of FAQ. Questions and their respective Answer should be a single combined entry within the array. ex ['Q... A...', 'Q... A...'] `);
     }
 
     set FAQ (arr = ['']) { return this._FAQ = arr }
@@ -637,11 +689,14 @@ class Controller extends Defaults { // base for controller
     test (msgArr = ['']) {
         msgArr.forEach ((msg, i) => {
             console.log(`- testing case #`, i +1, '-');
-            console.log(`User: ${msg}`);
-            console.log(`---`);
+            console.log(`Input:`);
+            console.log(msg);
+            // console.log(`---`);
             try { // just to catch unforseen errors
-                console.log(`FAQ Trace:`);
-                this.execute(msg);
+                // console.log(`FAQ Trace:`);
+                const result = this.execute(msg);
+                console.log(`Result:`);
+                console.log(result);
             } catch (error) {
                 console.warn(`------ FAQ failed ------`);
                 console.error(error);
@@ -655,7 +710,7 @@ class Controller extends Defaults { // base for controller
     }
 
     execute (msg = '') {
-        outputFAQ(msg, this.FAQ, this.settings); // WIP 
+        return outputFAQ(msg, this.FAQ, this.settings); // WIP 
     }
 }
 

@@ -40,6 +40,7 @@ BOT: Thank you for contacting support, your ticked has been marked as resolved.
 // created a script execution keyword execute chatbot.js directly (npm run faq)
 // I am using this block to test the FAQ function
 import { Controller } from './outputFAQ.js';
+console.clear();
 
 console.log(``);
 console.log(`-------------- FAQ --------------`);
@@ -122,6 +123,11 @@ const userMessages = [
     'What is your best work hack?',
     'What is the best work trip you have ever taken?'
 ];
+
+// console.log(`INPUT DATA:`); // expected result
+// console.log(`faqInputArray`, faqInputArray);
+// console.log(`userMessages`, userMessages);
+// console.log(``);
 
 const FAQ = new Controller(faqInputArray);
 
