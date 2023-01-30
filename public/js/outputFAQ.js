@@ -394,9 +394,9 @@ const filterFAQ = function (userInputArr, settings = new Controller([''])) { // 
         //     console.log(`filterSemiStrict: `, filterSemiStrict);
         //     console.log(`filterParial: `, filterParial);
         //     console.log(``);
-        //     console.log(`- Filter Results -`);
-        //     console.log(`matchedKeywords: `, [...matchedKeywords]);
-        //     console.log(`matchedIndex: `, [...matchedIndex]);
+            console.log(`- Filter Results -`);
+            console.log(`matchedKeywords: `, [...matchedKeywords]);
+            console.log(`matchedIndex: `, [...matchedIndex]);
         //     console.log(`Data-type: `, Set);
         //     console.log(``);
         // }

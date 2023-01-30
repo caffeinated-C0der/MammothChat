@@ -131,7 +131,8 @@ const userMessages = [
 
 const FAQ = new Controller(faqInputArray);
 
-FAQ.test ([userMessages[0]]);
+// FAQ.test ([userMessages[0]]);
+FAQ.test (userMessages);
 
 // very DRY, I dont care
 // if (false) { // bulk
