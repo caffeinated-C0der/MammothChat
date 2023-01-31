@@ -160,10 +160,7 @@ const filterFAQ = function (userInputArr, settings = new Controller([''])) { // 
     FAQ // ['Q: this. A: that.'] 
         .map(sentenceStr => sentenceStr.replaceAll('\n', ' ')) // remove \n tags before we split else headache
         .map (sentenceStr => {
-            faqWithSpaces.push( replacePunctuationByArray(sentenceStr, settings) ); // todo settings // fixme
-
-            // console.log(`>>>>>>>>>>>>>>>>>>>>>>>>>`);
-            // console.log(`faqWithSpaces-----`, faqWithSpaces);
+            faqWithSpaces.push( replacePunctuationByArray(sentenceStr, settings) ); 
 
             return faqWithSpaces // ['Q  this   A  that '] // remove punctuation
                 // note due to changes in code faqWithSpaces is already in the correct format for filtering
