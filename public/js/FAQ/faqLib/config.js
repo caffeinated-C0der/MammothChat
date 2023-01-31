@@ -1,8 +1,5 @@
-// dont store global variables here, use it for global setting tweaks
-// be it id/ class names or actual settings for features
+// review the concept of this file
 
-
-// note FAQ control objects
 const blacklistKeywords = [
     'to', 'the', 'like', 'do', 'that', 'is', 'can', 'i', 'am', 'a', 'how', 'my', 'me',
      'you', 'what', 'need',  'your', 'who', 'are', 'could', 'for', 'out', 'of'

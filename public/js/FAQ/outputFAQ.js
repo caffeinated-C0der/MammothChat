@@ -1,13 +1,4 @@
-// stored externally to allow remote changes without changing outputFAQ functionality
-// different level of abstraction to avoid altering the FAQ function
-import { blacklistKeywords, punctuationArr } from "./settings.js"; 
-
-// probably overcomplicating it
-// const formatObjects = function (output, parametersObj, name = '') {
-//     return function() {
-//         return {name, paramerters: parametersObj, output}
-//     }
-// }
+import { Defaults, Settings, Controller } from "./faqLib/Settings.js"
 
 // ---------------------- * Helper functions * ---------------------- //
 // helper function abstraction of replacePunctuationByArray
@@ -17,21 +8,13 @@ const replaceByArray = (strToReplace = '', arrToReplace = [''], replacementStr =
     { arrToReplace.forEach(str => strToReplace.replaceAll(`${str}`, `${replacementStr}`)) }
 
 // replace characters function
-// const replacePunctuationByArray = function (text = '', settings = { punctuationArray : [ ...punctuationArr ], replacementChar : ' '}) {
 const replacePunctuationByArray = function (text = '', settings = new Defaults()) {
     let output = text.slice(0); // dont mutate parameters // replaceAll doesn't mutate it returns new str
 
     // destructoring for required settings
     const {punctuationArray, replacementChar} = settings;
 
-    // console.warn(`DEBUG> REQUIRE`, '{punctuationArray, replacementChar}');
-    // console.warn(`DEBUG> input>`, `${text}, settings`);
-
     replaceByArray(output, punctuationArray, replacementChar);
-
-    // punctuationArray.forEach (char => { output = output.replaceAll(`${char}`, `${replacementChar}`); }); 
-    // console.warn(`output`, output);
-    // console.log(``);
 
     return output;
 }
@@ -40,16 +23,10 @@ const replacePunctuationByArray = function (text = '', settings = new Defaults()
 // return a copy of an array that has the correct keywords removed
 // only define defaults as the correct data type of a null equivalent, let the main function handle data defaults
 const removeFalsePositives = function(strArr = [''], keywordsToRemove = ['']) { 
-    // console.warn(`DEBUG> REQUIRE> no-settings`, 'strArr, keywordsToRemove');
-    // console.warn(`DEBUG> input>`, `${strArr}, ${keywordsToRemove}`);
-
     // make a copy of the original then filter array
         // by not returning the entries that are found within the remove array
     const filteredArr = [ ...strArr ]
             .filter (word => !keywordsToRemove.find (remove => word.toLowerCase() == remove.toLowerCase(), false)); 
-
-    // console.warn(`output`, filteredArr);
-    // console.log(``);
 
     return filteredArr; // return new array rather than mutating parameter
 }
@@ -72,11 +49,7 @@ const nonStrictComparison = function (
     // destructoring required settings
     const { consecutiveCount } = settings;
 
-    // console.warn(`DEBUG> REQUIRE`, '{consecutiveCount}');
-    // console.warn(`faq`, FAQ);
-    // console.warn(`msg`, MSG);
-    // console.log(``);
-
+    // review code
     // .map((val, i, arr) => {if (!i) {console.log(`array:`, arr);}; return val}) // use this to see data  
     const   faq = [...FAQ] // array of char ['Q',  ' ', 'w', 'h', 'y', ' ', 'd', 'o', ' ', 'i']
                         .join('').split(' ') // ['Q', 'why','do','i','need',o','install','a', etc]
@@ -101,9 +74,6 @@ const nonStrictComparison = function (
         } );
     } );
 
-    // console.warn(`output`, match);
-    // console.log(``);
-
     return match; 
 }
 
@@ -124,13 +94,9 @@ const partialComparison = function (
     // destructoring required settings
     const { consecutiveCount } = settings;
 
-    // console.warn(`DEBUG> REQUIRE`, '{consecutiveCount}');
-    // console.warn(`faq`, FAQ);
-    // console.warn(`msg`, MSG);
-
     // debug verify if this is working as expected as well as other comparison functions
 
-
+    // review code
     //note we should probably do a strict check for words smaller than settings.consecutive, to catch things like 'VM'
     // .map((val, i, arr) => {if (!i) {console.log(`array:`, arr);}; return val}) // use this to see data  
     const   faq = [...FAQ] // array of char ['Q',  ' ', 'w', 'h', 'y', ' ', 'd', 'o', ' ', 'i']
@@ -168,9 +134,6 @@ const partialComparison = function (
             }
         })
     });
-
-    // console.warn(`output`, match);
-    // console.log(``);
 
     return match;
 }
@@ -313,7 +276,7 @@ const filterFAQ = function (userInputArr, settings = new Controller([''])) { // 
 
     // store array of index rather than filter array to preserve original copy
     // and allow a new array to be filtered by the index rather than the content
-    const matchedKeywords = new Set(), // todo using single set for compilation 
+    const matchedKeywords = new Set(), 
           matchedIndex    = new Set();
 
     const faqWithSpaces = [];
@@ -384,22 +347,13 @@ const filterFAQ = function (userInputArr, settings = new Controller([''])) { // 
             // example vm and vm-windows
             // matching smaller than consecutive
 
-        }); // end FAQ.forEach();
+        } // end final inner
+    ); // end outer
     
-        // cleaner debugging output // todo create debug boolean setting
-        // if (true) {
-        //     console.log(`>>>>>>>>>>>>> results >>>>>>>>>>>>>`);
-        //     console.log(`- Filter Types -`);
-        //     console.log(`filterStrict: `, filterStrict);
-        //     console.log(`filterSemiStrict: `, filterSemiStrict);
-        //     console.log(`filterParial: `, filterParial);
-        //     console.log(``);
-            console.log(`- Filter Results -`);
-            console.log(`matchedKeywords: `, [...matchedKeywords]);
-            console.log(`matchedIndex: `, [...matchedIndex]);
-        //     console.log(`Data-type: `, Set);
-        //     console.log(``);
-        // }
+
+    console.log(`- Filter Results -`);
+    console.log(`matchedKeywords: `, [...matchedKeywords]);
+    console.log(`matchedIndex: `, [...matchedIndex]);
         
     console.log(`   ----------------`);
 
@@ -410,6 +364,7 @@ const filterFAQ = function (userInputArr, settings = new Controller([''])) { // 
 
 // ---------------------- * Main execution/ controller/ exported function * ---------------------- //
 
+// review comment
 // defaults stored as a global viarable 
 // to avoid some DRY duplication and to optimize declaration
 // meaning we only have to change defaults once
@@ -427,17 +382,8 @@ const filterFAQ = function (userInputArr, settings = new Controller([''])) { // 
 // hence the DRY duplication of defaults
 // the global viarable for defaults exist to simplify the DRY code
 // these settings are meant to allow the admin/ mod to adjust the functionality of the FAQ as needed
-// const defaultValues = {
-//     wordsToIgnore: blacklistKeywords, 
-//     punctuationToReplace: punctuationArr, 
-//     punctuationReplaceChar: '', 
-//     filterStrict: true, 
-//     filterSemiStrict: true, 
-//     filterParial: true,
-//     consecutiveCount: 3 
-// }
 
-// consider moving main function to the top of the scope - functions are hoisted
+// consider moving main function to the top of the scope - functions are hoisted // review comments
 // this function will construct the FAQ output message for the chat
 // instead of the normal way of declaring parameters the function accepts an object of settings
     // this allows the programer to choose which paramters they wish to declare
@@ -449,8 +395,9 @@ const outputFAQ = function (
     userTxt = ``, // clean user message string (can be multi-lined)
     FAQquestions = [``], // array of FAQ current format array of string ['Q: this. /n A: that.'] 
     settings = new Controller(['']) // Defaults doesnt have the FAQ array 
+    // delete once moved relavant comments consider moving descriptions into class for a describe method
     // unforseen error: when trying to alter one or more keywords in settings you overwrite the entire object, deleting the other defaults
-        // this error is being accounted for by declaring the defaults twice
+        // this error is being accounted for by declaring the defaults twice 
     // setting abstraction
     // settings = { 
     //     // *main functionality
@@ -486,7 +433,7 @@ const outputFAQ = function (
         filterSemiStrict,
         filterParial,
         consecutiveCount       
-    } = settings; 
+    } = settings;  // review comment
     // these settings would be split into new objects wherever they are relevant
     // within the sub functions of this module the defaults would not be redined again
         // the sub functions will rely on this function to handle defaults
@@ -495,44 +442,21 @@ const outputFAQ = function (
     // most of the sub functions of this module will have their own settings object
         // this is to manage the repective function and allow for more modular execution
 
-    // const pad = 25; // delete
-    // console.log(`--- settings debugger ---`);
-    // console.log(`wordsToIgnore?`.padEnd(pad, ' '),':', wordsToIgnore.length > 0);
-    // console.log(`punctuationToReplace?`.padEnd(pad, ' '),':', punctuationToReplace.length > 0);
-    // console.log(`punctuationReplaceChar`.padEnd(pad, ' '),':', `'${punctuationReplaceChar}'`);
-    // console.log(`filterStrict?`.padEnd(pad, ' '),':', filterStrict);
-    // console.log(`filterSemiStrict?`.padEnd(pad, ' '),':', filterSemiStrict);
-    // console.log(`filterParial?`.padEnd(pad, ' '),':', filterParial);
-    // console.log(`consecutiveCount`.padEnd(pad, ' '),':', consecutiveCount);
-    // console.log(`--- * ---`);
-    // console.log(``);
-
-      let text = userTxt.slice(0); // make a copy
+    let text = userTxt.slice(0); // make a copy
     const FAQ = [...FAQquestions]; // copy
-
-    // console.log(`Checkpoint ln:485`); 
 
     // if there is something to replace then replace it
     // accepts str returns str
     if ( punctuationToReplace.length > 0 ) text = replacePunctuationByArray(text, { punctuationArray: punctuationToReplace, 
-                                                                        replacementChar: punctuationReplaceChar }); // fixme
-
-    // console.log(`Checkpoint ln:492`); 
+                                                                        replacementChar: punctuationReplaceChar }); // fixme // todo // debug here
 
     text = text.split(' '); // makes string an array
 
     // accepts array returns array
     if (wordsToIgnore.length > 0) text = removeFalsePositives(text, wordsToIgnore); 
     
-    // console.log(`Checkpoint ln:499`);
-    
     // get index for filtering the FAQ // array of indexes
-    // const indexArray = filterFAQ(text, FAQ, {bool: filterStrict, consecutive: consecutiveCount}, {bool: true}); 
-    // console.log(`--- text ---`, text);
-    // console.log(`--- settings ---`, settings);
     const indexArray = filterFAQ(text, settings); 
-
-    // console.log(`Checkpoint ln:505`); 
 
     const filteredFAQ = []; // output
 
@@ -540,179 +464,12 @@ const outputFAQ = function (
         filteredFAQ.push(FAQ[index]);
     });
 
-    // console.log(`Checkpoint ln:513`); 
-
-    // debug // delete
-    // console.log(`FAQ:`); 
-    // FAQquestions.forEach ( (str, i) => console.log(`#`,i,' - ', str.replace('A:', '        A:')) ); // like a genius forgot this is all 
-    // filteredFAQ.forEach ( (str, i) => console.log(str.replace('A:', '        A:')) );
-    // console.log(``);
-    // console.log(`   Total Matches:`, [ ...new Set(filteredFAQ)].length);
-    // console.log(``);
-
     // set is similar to an array except it cant hold duplicates and is an object not array
     // by spreading the set object '...' it can be converted into an array format
     return ( filteredFAQ.length > 0 ) ? [ ...new Set(filteredFAQ)].join('\n') : 'I failed to compile any FAQ related to your problem.'; // string
 }
 
-class Settings { // base 
-    constructor() {
-        
-    }
-
-    execute (value = null) {
-        return value;
-    }
-
-    test (testArr = []) {
-        testArr.forEach(el => this.execute(el));
-        return testArr;
-    }
-}
-
-// default abstracts the settings for FAQ controller while still providing access to its functionality
-class Defaults extends Settings {
-    // modern ES6 convention using _ for private variables
-    // assigning defaults outside of constructor to allow only specific settings to be changed
-    // instead of forcing dev to assign all
-    _wordsToIgnore = blacklistKeywords;
-    _punctuationToReplace = punctuationArr;
-    _punctuationReplaceChar = '';
-    _filterStrict = true;
-    _filterSemiStrict = true;
-    _filterParial = true;
-    _consecutiveCount = 3;
-    
-    // defaults act as the parameters for settings hence why we extend
-    constructor() { 
-        super() 
-        this._settings = {
-           wordsToIgnore          : this._wordsToIgnore, 
-           punctuationToReplace   : this._punctuationToReplace, 
-           punctuationReplaceChar : this._punctuationReplaceChar, 
-           filterStrict           : this._filterStrict, 
-           filterSemiStrict       : this._filterSemiStrict, 
-           filterParial           : this._filterParial, 
-           consecutiveCount       : this._consecutiveCount
-        };
-    }
-
-    // main getter function
-    get settings () {
-        return this._settings;
-    }
-
-    // set addSetting (item) { // cant do this unless variables stored in a map
-    //     this.settings.push(item);
-    // }
-
-    // set functions to overwrite single settings
-    // unfortunatly since this isnt typescript we can't assign default datatypes
-    // consider abstracting this class to a typescript file
-    set wordsToIgnore (arr = [...blacklistKeywords]) {
-        return this._wordsToIgnore = arr;
-    }
-
-    set punctuationToReplace (arr = [...punctuationArr]) {
-        return this._punctuationToReplace = arr;
-    }
-
-    set punctuationReplaceChar (str = '') {
-        return this._punctuationReplaceChar = str;
-    }
-
-    set filterStrict (bool = true) {
-        return this._filterStrict = bool;
-    }
-
-    set filterSemiStrict (bool = true) {
-        return this._filterSemiStrict = bool;
-    }
-
-    set filterParial (bool = true) {
-        return this._filterParial = bool;
-    }
-
-    set consecutiveCount (int = 3) {
-        return this._consecutiveCount = int;
-    }
-
-    // get functions
-    get wordsToIgnore () {
-        return this._wordsToIgnore;
-    }
-
-    get punctuationToReplace () {
-        return this._punctuationToReplace;
-    }
-
-    get punctuationReplaceChar () {
-        return this._punctuationReplaceChar;
-    }
-
-    get filterStrict () {
-        return this._filterStrict;
-    }
-
-    get filterSemiStrict () {
-        return this._filterSemiStrict;
-    }
-
-    get filterParial () {
-        return this._filterParial;
-    }
-
-    get consecutiveCount () {
-        return this._consecutiveCount;
-    }
-}
-
-// this is the controller for FAQ settings
-    // to use this controller you just have to run execute
-    // constructor will ensure that you have the FAQ
-        // it also ensures that you don't have to define FAQ everytime you call executable
-    // the execute runs on the user message
-    // you can change any of the settings through their base set methods
-    // by not changing the variables their assumed defaults will be used
-class Controller extends Defaults { // base for controller
-    _FAQ;
-    constructor (faqArr) {
-        super();
-        this._FAQ = faqArr;
-        if ( !Array.isArray(this.FAQ) ) 
-            throw new Error(`Failed to initialize FAQ, -${FAQ}-. In order for the controller to function it requires an array of FAQ. Questions and their respective Answer should be a single combined entry within the array. ex ['Q... A...', 'Q... A...'] `);
-    }
-
-    set FAQ (arr = ['']) { return this._FAQ = arr }
-    get FAQ () { return this._FAQ }
-
-    test (msgArr = ['']) {
-        msgArr.forEach ((msg, i) => {
-            console.log(`- testing case #`, i +1, '-');
-            console.log(`Input:`);
-            console.log(msg);
-            // console.log(`---`);
-            try { // just to catch unforseen errors
-                // console.log(`FAQ Trace:`);
-                const result = this.execute(msg);
-                console.log(`Result:`);
-                console.log(result);
-            } catch (error) {
-                console.warn(`------ FAQ failed ------`);
-                console.error(error);
-                console.log(`------ * ------`);
-            } 
-            console.log(`-- end case #`, i +1, '--');
-            console.log(``);
-        });
-
-        return msgArr;
-    }
-
-    execute (msg = '') {
-        return outputFAQ(msg, this.FAQ, this.settings); // WIP 
-    }
-}
+// abstracted classes removed from here
 
 // ---------------------- * Module End * ---------------------- //
 
