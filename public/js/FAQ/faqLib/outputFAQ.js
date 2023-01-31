@@ -1,4 +1,4 @@
-import { Defaults, Settings, Controller } from "./faqLib/Settings.js"
+import { Defaults, Settings, Controller } from "./Settings.js"
 
 // ---------------------- * Helper functions * ---------------------- //
 // helper function abstraction of replacePunctuationByArray
@@ -477,6 +477,6 @@ const outputFAQ = function (
 // due to the strict handling of the data flow, the controller makes it easier to use this module
 // it is also the best way to expand the functionality with minimal effort
 // where to add more features or to give 'safer' control to the caller
-export { Controller }; 
+export { outputFAQ }; 
 
 // refactor change some arrays to sets to eliminate duplication 

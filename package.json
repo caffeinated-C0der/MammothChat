@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node ./src/server.cjs",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "faq": "node ./public/js/chatbot.js"
+    "faq": "node ./public/js/FAQ/chatbot.js"
   },
   "repository": {
     "type": "git", 

@@ -1,6 +1,6 @@
 // created a script execution keyword execute chatbot.js directly (npm run faq)
 // I am using this file to test the FAQ function
-import { Controller } from './outputFAQ.js';
+import { Controller } from './faqLib/Settings.js';
 console.clear();
 
 console.log(``);
@@ -92,8 +92,8 @@ const userMessages = [
 
 const FAQ = new Controller(faqInputArray);
 
-// FAQ.test ([userMessages[0]]);
-FAQ.test (userMessages);
+if (true) FAQ.test ([userMessages[0]]); // test first
+else FAQ.test (userMessages); // test bulk
 
 // very DRY, I dont care
 // if (false) { // bulk

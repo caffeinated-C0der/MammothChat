@@ -1,4 +1,5 @@
 import { blacklistKeywords, punctuationArr } from "./config.js"; 
+import { outputFAQ } from "./outputFAQ.js";
 
 
 class Settings { // base 
