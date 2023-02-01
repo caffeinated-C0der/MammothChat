@@ -25,16 +25,17 @@ const filterFAQ = function (userInputArr, settings = new Defaults()) { // abstra
             faqWithSpaces.push( replacePunctuationByArray(sentenceStr, settings) ); 
 
             // console.log(`faqWithSpaces`, faqWithSpaces);
-            console.log(`sentenceStr`, sentenceStr);
+            // console.log(`sentenceStr`, sentenceStr);
 
-            return faqWithSpaces // ['Q  this   A  that '] // remove punctuation
+            return faqWithSpaces[0] // ['Q  this   A  that '] // remove punctuation
                 // note due to changes in code faqWithSpaces is already in the correct format for filtering
-                // .split (' ') // ['Q', '', '', 'this', '', '', '', 'A', '', '', 'that', ''] // split into array  
+                .split (' ') // ['Q', '', '', 'this', '', '', '', 'A', '', '', 'that', ''] // split into array  
                 .filter (el => el != '' && el != ' ') // ['Q', 'this', 'A', 'that'] // remove spaces 
             // .map((val, i, arr) => {if (!i) {console.log(`array:`, arr);}; return val}) // tool
         })
         // this map is more like a forEach
         .forEach ((faq, i) => { // faq is an array of words
+            // console.log(`faqWithSpaces inside forEach\n`, faq);
             // note dont overwrite i 
             /* i= 5  ***(example from old testing data)***
                 faq = [ 'Q', 'why', 'do', 'i', 'need', 'to', 'install',  'a', 'virtual',  'machine\nA', 
@@ -99,6 +100,9 @@ const filterFAQ = function (userInputArr, settings = new Defaults()) { // abstra
     
     // report matched keywords empty [], but the indexes stored [ 0 ]
     // report posible issue storing first index without keyword then ending execution
+
+    // report update matches working as intended but matched indexes stores all
+    // report identify if its just one filter or all and if it may be how all process index
 
     console.log(`- Filter Results -`);
     console.log(`   matchedKeywords: `.padEnd(20), [ ...matchedKeywords.values() ]);
