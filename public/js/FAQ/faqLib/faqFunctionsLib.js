@@ -1,5 +1,116 @@
 import { Defaults } from "./Defaults.js"
 
+// ---------------------- * Main Filter Logic * ---------------------- //
+
+// filter FAQ array for keywords that match the user input then returns the filtered FAQ array // I don't think this mutates either
+// dont pull defaults from top scope let the function supply them
+const filterFAQ = function (userInputArr, settings = new Defaults()) { // abstracted FAQ into defaults
+    // destructoring dependancies
+    const { filterParial, filterSemiStrict, filterStrict, consecutiveCount, FAQ } = settings;
+
+    // remove the default but also enforce the correct type
+    // const FAQ = (  Array.isArray(settings.FAQ) ) ? [ ...FAQ ] : [ '' ]; // copy
+    const txt = (  Array.isArray(userInputArr) ) ? [ ...userInputArr ] : [ '' ]; // copy
+
+    // store array of index rather than filter array to preserve original copy
+    // and allow a new array to be filtered by the index rather than the content
+    const matchedKeywords = new Set(), 
+          matchedIndex    = new Set();
+
+    const faqWithSpaces = [];
+
+    FAQ // ['Q: this. A: that.'] 
+        .map(sentenceStr => sentenceStr.replaceAll('\n', ' ')) // remove \n tags before we split else headache
+        .map (sentenceStr => {
+            faqWithSpaces.push( replacePunctuationByArray(sentenceStr, settings) ); 
+
+            // console.log(`faqWithSpaces`, faqWithSpaces);
+            console.log(`sentenceStr`, sentenceStr);
+
+            return faqWithSpaces // ['Q  this   A  that '] // remove punctuation
+                // note due to changes in code faqWithSpaces is already in the correct format for filtering
+                // .split (' ') // ['Q', '', '', 'this', '', '', '', 'A', '', '', 'that', ''] // split into array  
+                .filter (el => el != '' && el != ' ') // ['Q', 'this', 'A', 'that'] // remove spaces 
+            // .map((val, i, arr) => {if (!i) {console.log(`array:`, arr);}; return val}) // tool
+        })
+        // this map is more like a forEach
+        .forEach ((faq, i) => { // faq is an array of words
+            // note dont overwrite i 
+            /* i= 5  ***(example from old testing data)***
+                faq = [ 'Q', 'why', 'do', 'i', 'need', 'to', 'install',  'a', 'virtual',  'machine\nA', 
+                        'because', 'cross', 'platform', 'support', 'is', 'a', 'bit', 'janky', 'without',  'a', 'vm' ]  */
+            // Object.freeze(faq); // frozen
+
+            // each filter down will most likely have more matches
+            // thus more results but also less related results
+
+            // strict comparison
+            if (filterStrict){ 
+                txt.forEach( userKeyword => { // [ 'install', 'vm', 'onto', 'computer' ]
+                    // const findKeyword = faq.find( faqKeyword => faqKeyword.toLowerCase() == userKeyword.toLowerCase() ); 
+                    const findKeyword = faq.find( faqKeyword => { // debug delete
+                        // console.log(`   comparison`);
+                        // console.log(`       faqKeyword.toLowerCase() == userKeyword.toLowerCase()`);
+                        // console.log(`       ${faqKeyword.toLowerCase()} == ${userKeyword.toLowerCase()}`);
+                        return faqKeyword.toLowerCase() == userKeyword.toLowerCase();
+                    }); 
+                    // console.log(`faq`, faq);
+                    // console.log(`keyword`, userKeyword);
+                    // console.log(`   findKeyword`, findKeyword);
+                    // returns true or undefined
+
+                    // if keyword not found exit else store result
+                    if (!findKeyword) return; // if undefined return // foreach return not .map
+
+                    matchedIndex.add(i);
+                    matchedKeywords.add(userKeyword);
+                });
+            }
+
+            // partially strict comparison
+            if (filterSemiStrict) { 
+                const temp = [...nonStrictComparison([faqWithSpaces[i]], txt, settings)]; 
+
+                if (temp.length >! 0) return;  // return if match not found
+                // else match found and continue
+
+                matchedIndex.add(i);
+                temp.forEach( key => matchedKeywords.add(key) );
+            }; 
+
+            // daniel's partial comparison
+            // same logic as semi strict
+            if (filterParial) { 
+                const temp = partialComparison(faq, txt, settings); 
+
+                if (temp.length >! 0) return; 
+
+                matchedIndex.add(i);
+                temp.forEach( key => matchedKeywords.add(key) )
+            }
+
+            // todo filterNonConsecutivePartialStrict
+            // strict matching of keywords the same length as keyword
+            // example vm and vm-windows
+            // matching smaller than consecutive
+
+        } // end final inner
+    ); // end outer
+    
+    // report matched keywords empty [], but the indexes stored [ 0 ]
+    // report posible issue storing first index without keyword then ending execution
+
+    console.log(`- Filter Results -`);
+    console.log(`   matchedKeywords: `.padEnd(20), [ ...matchedKeywords.values() ]);
+    console.log(`   matchedIndex: `.padEnd(20), [ ...matchedIndex.values() ]);
+        
+    console.log(`   ----------------`);
+
+    // array/ set of indexes that had a keyword match
+    // set eliminates duplicatation but needs to be spread and returned within array
+    return matchedIndex;
+}
+
 // ---------------------- * Helper functions * ---------------------- //
 // helper function abstraction of replacePunctuationByArray
 // same functionality as replacePunctuationByArray but without strict settings
@@ -136,117 +247,6 @@ const partialComparison = function (
     });
 
     return match;
-}
-
-// ---------------------- * Main Filter Logic * ---------------------- //
-
-// filter FAQ array for keywords that match the user input then returns the filtered FAQ array // I don't think this mutates either
-// dont pull defaults from top scope let the function supply them
-const filterFAQ = function (userInputArr, settings = new Defaults()) { // abstracted FAQ into defaults
-    // destructoring dependancies
-    const { filterParial, filterSemiStrict, filterStrict, consecutiveCount, FAQ } = settings;
-
-    // remove the default but also enforce the correct type
-    // const FAQ = (  Array.isArray(settings.FAQ) ) ? [ ...FAQ ] : [ '' ]; // copy
-    const txt = (  Array.isArray(userInputArr) ) ? [ ...userInputArr ] : [ '' ]; // copy
-
-    // store array of index rather than filter array to preserve original copy
-    // and allow a new array to be filtered by the index rather than the content
-    const matchedKeywords = new Set(), 
-          matchedIndex    = new Set();
-
-    const faqWithSpaces = [];
-
-    FAQ // ['Q: this. A: that.'] 
-        .map(sentenceStr => sentenceStr.replaceAll('\n', ' ')) // remove \n tags before we split else headache
-        .map (sentenceStr => {
-            faqWithSpaces.push( replacePunctuationByArray(sentenceStr, settings) ); 
-
-            // console.log(`faqWithSpaces`, faqWithSpaces);
-            console.log(`sentenceStr`, sentenceStr);
-
-            return faqWithSpaces // ['Q  this   A  that '] // remove punctuation
-                // note due to changes in code faqWithSpaces is already in the correct format for filtering
-                // .split (' ') // ['Q', '', '', 'this', '', '', '', 'A', '', '', 'that', ''] // split into array  
-                .filter (el => el != '' && el != ' ') // ['Q', 'this', 'A', 'that'] // remove spaces 
-            // .map((val, i, arr) => {if (!i) {console.log(`array:`, arr);}; return val}) // tool
-        })
-        // this map is more like a forEach
-        .forEach ((faq, i) => { // faq is an array of words
-            // note dont overwrite i 
-            /* i= 5  ***(example from old testing data)***
-                faq = [ 'Q', 'why', 'do', 'i', 'need', 'to', 'install',  'a', 'virtual',  'machine\nA', 
-                        'because', 'cross', 'platform', 'support', 'is', 'a', 'bit', 'janky', 'without',  'a', 'vm' ]  */
-            // Object.freeze(faq); // frozen
-
-            // each filter down will most likely have more matches
-            // thus more results but also less related results
-
-            // strict comparison
-            if (filterStrict){ 
-                txt.forEach( userKeyword => { // [ 'install', 'vm', 'onto', 'computer' ]
-                    // const findKeyword = faq.find( faqKeyword => faqKeyword.toLowerCase() == userKeyword.toLowerCase() ); 
-                    const findKeyword = faq.find( faqKeyword => { // debug delete
-                        // console.log(`   comparison`);
-                        // console.log(`       faqKeyword.toLowerCase() == userKeyword.toLowerCase()`);
-                        // console.log(`       ${faqKeyword.toLowerCase()} == ${userKeyword.toLowerCase()}`);
-                        return faqKeyword.toLowerCase() == userKeyword.toLowerCase();
-                    }); 
-                    // console.log(`faq`, faq);
-                    // console.log(`keyword`, userKeyword);
-                    // console.log(`   findKeyword`, findKeyword);
-                    // returns true or undefined
-
-                    // if keyword not found exit else store result
-                    if (!findKeyword) return; // if undefined return // foreach return not .map
-
-                    matchedIndex.add(i);
-                    matchedKeywords.add(userKeyword);
-                });
-            }
-
-            // partially strict comparison
-            if (filterSemiStrict) { 
-                const temp = [...nonStrictComparison([faqWithSpaces[i]], txt, settings)]; 
-
-                if (temp.length >! 0) return;  // return if match not found
-                // else match found and continue
-
-                matchedIndex.add(i);
-                temp.forEach( key => matchedKeywords.add(key) );
-            }; 
-
-            // daniel's partial comparison
-            // same logic as semi strict
-            if (filterParial) { 
-                const temp = partialComparison(faq, txt, settings); 
-
-                if (temp.length >! 0) return; 
-
-                matchedIndex.add(i);
-                temp.forEach( key => matchedKeywords.add(key) )
-            }
-
-            // todo filterNonConsecutivePartialStrict
-            // strict matching of keywords the same length as keyword
-            // example vm and vm-windows
-            // matching smaller than consecutive
-
-        } // end final inner
-    ); // end outer
-    
-    // report matched keywords empty [], but the indexes stored [ 0 ]
-    // report posible issue storing first index without keyword then ending execution
-
-    console.log(`- Filter Results -`);
-    console.log(`   matchedKeywords: `.padEnd(20), [ ...matchedKeywords.values() ]);
-    console.log(`   matchedIndex: `.padEnd(20), [ ...matchedIndex.values() ]);
-        
-    console.log(`   ----------------`);
-
-    // array/ set of indexes that had a keyword match
-    // set eliminates duplicatation but needs to be spread and returned within array
-    return matchedIndex;
 }
 
 export { filterFAQ, replaceByArray, replacePunctuationByArray, nonStrictComparison, removeFalsePositives }
