@@ -1,7 +1,7 @@
 // created a script execution keyword execute chatbot.js directly (npm run faq)
 // I am using this file to test the FAQ function
-import { Controller } from './faqLib/Settings.js';
-console.clear();
+import { Controller } from './faqController.js';
+// console.clear();
 
 console.log(``);
 console.log(`-------------- FAQ --------------`);
@@ -90,46 +90,12 @@ const userMessages = [
 // console.log(`userMessages`, userMessages);
 // console.log(``);
 
-const FAQ = new Controller(faqInputArray);
+const FaqController = new Controller(faqInputArray);
 
-if (true) FAQ.test ([userMessages[0]]); // test first
-else FAQ.test (userMessages); // test bulk
+// console.log(`Controller.FAQ`, FaqController.FAQ);
 
-// very DRY, I dont care
-// if (false) { // bulk
-//     userMessages.forEach((question, i) => {  
-//     console.log(`- testing case #`, i +1, '-');
-//     console.log(`User: ${question}`);
-//     console.log(`---`);
-//     let output = 'ERROR';
-//     try { // just to catch unforseen errors
-//         console.log(`FAQ Trace:`);
-//         output = outputFAQ(question, faqInputArray);
-//     } catch (error) {
-//         console.error(`FAQ failed`, error);
-//     } 
-//     // console.log(`Result:\n${output}`);
-//     console.log(`-- end case #`, i +1, '--');
-//     console.log(``);
-// })} else { // single
-//     const [question] = userMessages.slice(-1);
-//     console.log(`- testing case #`, userMessages.length -1, '-');
-//     console.log(`User: ${question}`);
-//     console.log(`---`);
-//     // const obj = {}
-//     try { // just to catch unforseen errors
-//         console.log(`FAQ Trace:`);
-//         // const output = outputFAQ(question, faqInputArray, {consecutiveCount: 4});
-//         const output = outputFAQ(question, faqInputArray);
-//         console.log(`Output:\n${output}`);
-//     } catch (error) {
-//         console.warn(` === FAQ failed === `);
-//         console.error(error);
-//         console.log(``);
-//     } 
-//     console.log(`-- end case #`, userMessages.length -1, '--');
-//     console.log(``);
-// }
+if (true) FaqController.test ([userMessages[0]]); // test first
+else FaqController.test (userMessages); // test bulk
 
 console.log(``);
 console.log(`========================= END =========================`);
