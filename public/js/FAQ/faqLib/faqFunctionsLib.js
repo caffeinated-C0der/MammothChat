@@ -150,8 +150,6 @@ const filterFAQ = function (userInputArr, settings = new Defaults()) { // abstra
     // const FAQ = (  Array.isArray(settings.FAQ) ) ? [ ...FAQ ] : [ '' ]; // copy
     const txt = (  Array.isArray(userInputArr) ) ? [ ...userInputArr ] : [ '' ]; // copy
 
-    console.log(`INPUT FAQ`, FAQ);
-
     // store array of index rather than filter array to preserve original copy
     // and allow a new array to be filtered by the index rather than the content
     const matchedKeywords = new Set(), 
