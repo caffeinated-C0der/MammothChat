@@ -3,6 +3,10 @@
 import { Controller } from './faqController.js';
 // console.clear();
 
+const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
+const anyIndex = (max) => randomInt(0, max);
+
+
 // junk data - meant to be humorous
 const faqInputArray = [
     `Q: can't log into service now?\nA: contact support`,
@@ -85,14 +89,26 @@ console.log(``);
 console.log(`-------------- FAQ --------------`);
 console.log(``);
 
-const FaqController = new Controller(faqInputArray);
-FaqController.filterStrict = false;
-FaqController.filterSemiStrict = false;
-FaqController.filterParial = true;
+const bulk = false;
 
-if (true) FaqController.test ([userMessages[0]]); // test first
-else FaqController.test (userMessages); // test bulk
+const FaqController = new Controller(faqInputArray);
+
+Object.entries(FaqController.filters).forEach( (nameBoolArr, i, arr) => {
+    const testIndex = anyIndex(userMessages.length - 1); // consistancy within random
+
+    arr.forEach(filter => filter[1] = false);
+    nameBoolArr[1] = true;
+
+    console.log(``);
+    console.log(` - Testing filter - *** "${nameBoolArr[0]}"***`);
+    console.log(` - UserMessage index - `, testIndex);
+    console.log(``);
+
+    if (!bulk) FaqController.test ([userMessages[testIndex]]); // test single
+    else FaqController.test (userMessages); // test bulk
+});
 
 console.log(``);
 console.log(`========================= END =========================`);
 console.log(``);
+
