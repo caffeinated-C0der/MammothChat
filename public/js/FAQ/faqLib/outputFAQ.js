@@ -45,8 +45,8 @@ const outputFAQ = function ( userTxt = ``, Def = new Defaults() ) {
 
     // review returning null if nothing found
     // return ( filteredFAQ.length > 0 ) ? filteredFAQ.values().join('\n') : 'I failed to compile any FAQ related to your problem.'; // string
-    // final safety net
-    return ( filteredFAQ.length > 0 ) ? [...filteredFAQ].join('\n') : ''; // string
+    return ( filteredFAQ.length > 0 ) ? [...filteredFAQ].join('\n') : ''; // final safety net 
+    // returning string
 }
 
 export { outputFAQ };
@@ -54,7 +54,7 @@ export { outputFAQ };
     // resolved matched keywords empty [], but the indexes stored [ 0 ]
     // resolved posible issue storing first index without keyword then ending execution
 
-    // report update matches working as intended but matched indexes stores all
+    // report matches working as intended but matched indexes stores all
     // report identify if its just one filter or all and if it may be how all process index
 
     // report all 3 filters has exactly the same results which mean the general filter logic is bugged
