@@ -3,10 +3,6 @@
 import { Controller } from './faqController.js';
 // console.clear();
 
-console.log(``);
-console.log(`-------------- FAQ --------------`);
-console.log(``);
-
 // junk data - meant to be humorous
 const faqInputArray = [
     `Q: can't log into service now?\nA: contact support`,
@@ -85,14 +81,14 @@ const userMessages = [
     'What is the best work trip you have ever taken?'
 ];
 
-// console.log(`INPUT DATA:`); // expected result
-// console.log(`faqInputArray`, faqInputArray);
-// console.log(`userMessages`, userMessages);
-// console.log(``);
+console.log(``);
+console.log(`-------------- FAQ --------------`);
+console.log(``);
 
 const FaqController = new Controller(faqInputArray);
-
-// console.log(`Controller.FAQ`, FaqController.FAQ);
+FaqController.filterStrict = false;
+FaqController.filterSemiStrict = false;
+FaqController.filterParial = true;
 
 if (true) FaqController.test ([userMessages[0]]); // test first
 else FaqController.test (userMessages); // test bulk

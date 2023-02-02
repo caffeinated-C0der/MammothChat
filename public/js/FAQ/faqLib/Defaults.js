@@ -18,6 +18,7 @@ class Settings { // base
     }
 
     get log () {
+        this.report('Printing log to console');
         console.log(`--- Status Report ---`);
         this._log.forEach((status, i) => console.log('  ', `${`${i}`.padStart(3, 0)}: ${status}`));
         console.log(`---  Status End  ---`);
@@ -30,10 +31,12 @@ class Settings { // base
     }
 
     execute (value = null) {
+        this.report('Base class execute');
         return value;
     }
 
     test (testArr = []) {
+        this.report('Base class test');
         testArr.forEach(el => this.execute(el));
         // this.log;
         // return testArr;
@@ -60,7 +63,7 @@ class Defaults extends Settings {
     // in order for the settings object to work correctly it requires all the settings
     // in the event that more settings would be added if you get undefined just add the property to this settings sub class
     constructor() { 
-        super() 
+        super();
         this._settings = {
            wordsToIgnore          : this._wordsToIgnore, 
            punctuationToReplace   : this._punctuationToReplace, 
@@ -71,11 +74,25 @@ class Defaults extends Settings {
            consecutiveCount       : this._consecutiveCount,
            FAQ                    : this._FAQ
         };
+        this.report('Defaults settings object instantiated');
+
+        this._filters = {
+            filterStrict           : this._filterStrict, 
+            filterSemiStrict       : this._filterSemiStrict, 
+            filterParial           : this._filterParial,
+        }
+        this.report('Defaults filters object instantiated');
     }
 
     // main getter function
     get settings () {
+        this.report('Retrieving object settings.');
         return this._settings;
+    }
+
+    get filters () {
+        this.report('Retrieving object filters.');
+        return this._filters;
     }
 
     // set addSetting (item) { // cant do this unless variables stored in a map
@@ -130,34 +147,42 @@ class Defaults extends Settings {
 
     // get functions
     get wordsToIgnore () {
+        this.report('Retrieving wordsToIgnore.');
         return this._wordsToIgnore;
     }
 
     get punctuationToReplace () {
+        this.report('Retrieving punctuationToReplace.');
         return this._punctuationToReplace;
     }
 
     get punctuationReplaceChar () {
+        this.report('Retrieving punctuationReplaceChar.');
         return this._punctuationReplaceChar;
     }
 
     get filterStrict () {
+        this.report('Retrieving filterStrict.');
         return this._filterStrict;
     }
 
     get filterSemiStrict () {
+        this.report('Retrieving filterSemiStrict.');
         return this._filterSemiStrict;
     }
 
     get filterParial () {
+        this.report('Retrieving filterParial.');
         return this._filterParial;
     }
 
     get consecutiveCount () {
+        this.report('Retrieving consecutiveCount.');
         return this._consecutiveCount;
     }
 
     get FAQ () {
+        this.report('Retrieving FAQ.');
         return this._FAQ;
     }
 }

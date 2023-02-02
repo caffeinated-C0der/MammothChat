@@ -12,6 +12,7 @@ import { Defaults } from './faqLib/Defaults.js';
         // _FAQ; // abstracted
         constructor (faqArr = []) {
             super();
+            this.report('FAQ Controller Created');
             // console.log(`Init controller FAQ constructor Input:\n`, faqArr);
             // console.log(`   ------------------------------------------------`);
             this.FAQ = faqArr;
@@ -29,6 +30,7 @@ import { Defaults } from './faqLib/Defaults.js';
     
         test (msgArr = ['']) {
             // console.log(`FAQ.length > 0 in controller test`, this.FAQ.length > 0); // this is not the problem
+            this.report('Running controller test.');
     
             msgArr.forEach ((msg, i) => {
                 console.log(`- testing case #`, i +1, '-');
@@ -48,11 +50,15 @@ import { Defaults } from './faqLib/Defaults.js';
                 console.log(``);
             });
     
+            this.report('Ending controller test.');
             return this.log;
         }
     
         execute (msg = '') {
-            return outputFAQ(msg, this.settings); 
+            this.report('Running controller execute.');
+            const result = outputFAQ(msg, this.settings); 
+            this.report('Ending controller execute.');
+            return result;
         }
     }
 

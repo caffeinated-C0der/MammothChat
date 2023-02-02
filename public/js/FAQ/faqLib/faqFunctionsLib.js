@@ -98,12 +98,6 @@ const filterFAQ = function (userInputArr, settings = new Defaults()) { // abstra
         } // end final inner
     ); // end outer
     
-    // report matched keywords empty [], but the indexes stored [ 0 ]
-    // report posible issue storing first index without keyword then ending execution
-
-    // report update matches working as intended but matched indexes stores all
-    // report identify if its just one filter or all and if it may be how all process index
-
     console.log(`- Filter Results -`);
     console.log(`   matchedKeywords: `.padEnd(20), [ ...matchedKeywords.values() ]);
     console.log(`   matchedIndex: `.padEnd(20), [ ...matchedIndex.values() ]);
@@ -342,7 +336,7 @@ export { filterFAQ, replaceByArray, replacePunctuationByArray, nonStrictComparis
 //     let text = userTxt.slice(0); // make a copy
 //     const FAQ = [...settings.FAQ]; // copy
 
-//     // report FAQ is somewhere [''] which causes the FAQ function to glitch
+//     // resolved FAQ is somewhere [''] which causes the FAQ function to glitch 
 
 
 //     // if there is something to replace then replace it

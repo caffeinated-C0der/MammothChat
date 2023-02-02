@@ -50,3 +50,11 @@ const outputFAQ = function ( userTxt = ``, Def = new Defaults() ) {
 }
 
 export { outputFAQ };
+
+    // resolved matched keywords empty [], but the indexes stored [ 0 ]
+    // resolved posible issue storing first index without keyword then ending execution
+
+    // report update matches working as intended but matched indexes stores all
+    // report identify if its just one filter or all and if it may be how all process index
+
+    // report all 3 filters has exactly the same results which mean the general filter logic is bugged
