@@ -6,7 +6,7 @@ const blacklistKeywords = [
 const punctuationArr = [ 
 '!', '"', '#', '$', '%', '&', "'", '(', ')', '*', '+', ',', 
 '-', '.', '/', ':', ';', '?', '@', '[', ']', '^', '_', 
-'{', '|', '}', '~' ]; // does not include backtilt and backslash as those don't like being in strings
+'{', '|', '}', '~', '`']; // does not include backtilt and backslash as those don't like being in strings
 // might need to try using other methods to include those into strings for comparison
 
 // import { blacklistKeywords, punctuationArr } from "./config.js"; 
@@ -64,35 +64,52 @@ class Defaults extends Settings {
     // in the event that more settings would be added if you get undefined just add the property to this settings sub class
     constructor() { 
         super();
-        this._settings = {
-           wordsToIgnore          : this._wordsToIgnore, 
-           punctuationToReplace   : this._punctuationToReplace, 
-           punctuationReplaceChar : this._punctuationReplaceChar, 
-           filterStrict           : this._filterStrict, 
-           filterSemiStrict       : this._filterSemiStrict, 
-           filterParial           : this._filterParial, 
-           consecutiveCount       : this._consecutiveCount,
-           FAQ                    : this._FAQ
-        };
-        this.report('Defaults settings object instantiated');
+        // this._settings = {
+        //     wordsToIgnore          : this._wordsToIgnore, 
+        //     punctuationToReplace   : this._punctuationToReplace, 
+        //     punctuationReplaceChar : this._punctuationReplaceChar, 
+        //     filterStrict           : this._filterStrict, 
+        //     filterSemiStrict       : this._filterSemiStrict, 
+        //     filterParial           : this._filterParial, 
+        //     consecutiveCount       : this._consecutiveCount,
+        //     FAQ                    : this._FAQ
+        //  };
+        // this.report('Defaults settings object instantiated');
 
-        this._filters = {
-            filterStrict           : this._filterStrict, 
-            filterSemiStrict       : this._filterSemiStrict, 
-            filterParial           : this._filterParial,
-        }
-        this.report('Defaults filters object instantiated');
+        // this._filters = {
+        //     filterStrict           : this._filterStrict, 
+        //     filterSemiStrict       : this._filterSemiStrict, 
+        //     filterParial           : this._filterParial,
+        // }
+        // this.report('Defaults filters object instantiated');
     }
 
-    // main getter function
+    // note settings and filters are read-only
     get settings () {
-        this.report('Retrieving object settings.');
-        return this._settings;
+        // this.report('Retrieving copy of *settings* as a frozen object.'); // spam
+        return Object.freeze({
+            wordsToIgnore          : this._wordsToIgnore, 
+            punctuationToReplace   : this._punctuationToReplace, 
+            punctuationReplaceChar : this._punctuationReplaceChar, 
+            filterStrict           : this._filterStrict, 
+            filterSemiStrict       : this._filterSemiStrict, 
+            filterParial           : this._filterParial, 
+            consecutiveCount       : this._consecutiveCount,
+            FAQ                    : this._FAQ
+         });
     }
 
     get filters () {
-        this.report('Retrieving object filters.');
-        return this._filters;
+        // this.report('Retrieving copy of *filters* as a frozen object.'); // spam
+        return Object.freeze({
+            filterStrict           : this._filterStrict, 
+            filterSemiStrict       : this._filterSemiStrict, 
+            filterParial           : this._filterParial,
+        });
+    }
+
+    get me () {
+        return this;
     }
 
     // set addSetting (item) { // cant do this unless variables stored in a map
@@ -103,87 +120,109 @@ class Defaults extends Settings {
     // unfortunatly since this isnt typescript we can't assign default datatypes
     // consider abstracting this class to a typescript file for type handling
     set wordsToIgnore (arr = [...blacklistKeywords]) {
-        this.report('wordsToIgnore has been overwriten');
+        this.report(`wordsToIgnore CHANGED*.`);
         return this._wordsToIgnore = arr;
     }
 
     set punctuationToReplace (arr = [...punctuationArr]) {
-        this.report('set punctuationToReplace (arr = [...punctuationArr]) { has been overwriten');
+        this.report(`punctuationToReplace CHANGED*.`);
         return this._punctuationToReplace = arr;
     }
 
     set punctuationReplaceChar (str = '') {
-        this.report('punctuationReplaceChar has been overwriten');
+        this.report(`punctuationReplaceChar CHANGED*. (${this._punctuationReplaceChar} ->> ${str})`);
         return this._punctuationReplaceChar = str;
     }
 
     set filterStrict (bool = true) {
-        this.report('filterStrict has been overwriten');
+        this.report(`filterStrict CHANGED*. (${this._filterStrict} ->> ${bool})`);
         return this._filterStrict = bool;
     }
 
     set filterSemiStrict (bool = true) {
-        this.report('filterSemiStrict has been overwriten');
+        this.report(`filterSemiStrict CHANGED*. (${this._filterSemiStrict} ->> ${bool})`);
         return this._filterSemiStrict = bool;
     }
 
     set filterParial (bool = true) {
-        this.report('filterParial has been overwriten');
+        this.report(`filterParial CHANGED*. (${this._filterParial} ->> ${bool})`);
         return this._filterParial = bool;
     }
 
     set consecutiveCount (int = 3) {
-        this.report('consecutiveCount has been overwriten');
+        this.report(`consecutiveCount CHANGED*. (${this._consecutiveCount} ->> ${int})`);
         return this._consecutiveCount = int;
     }
 
     set FAQ (arr = []) {
-        if (this.FAQ.length > 0) this.report(`Deleting entries in FAQ, [${this.FAQ}]`);
+        if (this.FAQ.length > 0) this.report(`Deleting entries in FAQ, [${this._FAQ}]`);
         while (this.FAQ.length > 0) this._FAQ.pop();
-        this.report('FAQ has been overwriten');
+        this.report('FAQ CHANGED*');
         
         return this._FAQ.push(...arr);
     }
 
     // get functions
     get wordsToIgnore () {
-        this.report('Retrieving wordsToIgnore.');
+        this.report(`Retrieving wordsToIgnore.`);
         return this._wordsToIgnore;
     }
 
     get punctuationToReplace () {
-        this.report('Retrieving punctuationToReplace.');
+        this.report(`Retrieving punctuationToReplace.`);
         return this._punctuationToReplace;
     }
 
     get punctuationReplaceChar () {
-        this.report('Retrieving punctuationReplaceChar.');
+        this.report(`Retrieving punctuationReplaceChar.`);
         return this._punctuationReplaceChar;
     }
 
     get filterStrict () {
-        this.report('Retrieving filterStrict.');
+        this.report(`Retrieving filterStrict. (${this._filterStrict})`);
         return this._filterStrict;
     }
 
     get filterSemiStrict () {
-        this.report('Retrieving filterSemiStrict.');
+        this.report(`Retrieving filterSemiStrict. (${this._filterSemiStrict})`);
         return this._filterSemiStrict;
     }
 
     get filterParial () {
-        this.report('Retrieving filterParial.');
+        this.report(`Retrieving filterParial. (${this._filterParial})`);
         return this._filterParial;
     }
 
     get consecutiveCount () {
-        this.report('Retrieving consecutiveCount.');
+        this.report(`Retrieving consecutiveCount. (${this._consecutiveCount})`);
         return this._consecutiveCount;
     }
 
     get FAQ () {
         this.report('Retrieving FAQ.');
-        return this._FAQ;
+        return [ ...new Set( this._FAQ ) ]; // global elimination of duplicates on FAQ
+    }
+
+    resetFilters (bool = false) { // no cheat have to do long
+        this.report(`Reseting Filters *${bool}.`)
+        this.filterStrict = bool;
+        this.filterSemiStrict = bool;
+        this.filterParial = bool;
+    }
+
+    toggleFilterStrict () {
+        this.report(`Toggle "FilterStrict" *(${this.filterStrict} ->> ${!this.filterStrict}).`);
+        this.filterStrict = !this.filterStrict;
+    }
+
+    toggleFilterSemiStrict () { 
+        this.report(`Toggle "FilterSemiStrict" *(${this.filterSemiStrict} ->> ${!this.filterSemiStrict}).`);
+        this.filterSemiStrict = !this.filterSemiStrict;
+    }
+
+    toggleFilterParial () { 
+        this.report(`Toggle "FilterParial" *(${this.filterParial} ->> ${!this.filterParial}).`);
+        this.filterParial = !this.filterParial;
     }
 }
 

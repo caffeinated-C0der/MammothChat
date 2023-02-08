@@ -1,11 +1,9 @@
 // created a script execution keyword execute chatbot.js directly (npm run faq)
 // I am using this file to test the FAQ function
-import { Controller } from './faqController.js';
-// console.clear();
+import { Controller } from './FaqController.js';
 
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
 const anyIndex = (max) => randomInt(0, max);
-
 
 // junk data - meant to be humorous
 const faqInputArray = [
@@ -93,16 +91,17 @@ const bulk = false;
 
 const FaqController = new Controller(faqInputArray);
 
+// FaqController.report('AYE THIS SHOULD WORK')// WORKING
+
 Object.entries(FaqController.filters).forEach( (nameBoolArr, i, arr) => {
-    const testIndex = anyIndex(userMessages.length - 1); // consistancy within random
+    // const testIndex = anyIndex(userMessages.length - 1); // consistancy within random
+    const testIndex = 0; // consistancy within random
+    
+    // if (i != anyIndex(arr.length -1)) return; // just to test 1 for now
+    if (i != 0) return; // just to test 1 for now
 
-    arr.forEach(filter => filter[1] = false);
-    nameBoolArr[1] = true;
-
-    console.log(``);
-    console.log(` - Testing filter - *** "${nameBoolArr[0]}"***`);
-    console.log(` - UserMessage index - `, testIndex);
-    console.log(``);
+    FaqController.resetFilters(false);
+    FaqController[`${nameBoolArr[0]}`] = true;
 
     if (!bulk) FaqController.test ([userMessages[testIndex]]); // test single
     else FaqController.test (userMessages); // test bulk
