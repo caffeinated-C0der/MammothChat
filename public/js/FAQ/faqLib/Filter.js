@@ -2,8 +2,8 @@ import { Defaults } from "./Defaults.js";
 
 // done import and execute filters in filterFAQ
 
-// todo creates filter classes to .execute
-// todo fix filter logic in filterFAQ
+// resolved creates filter classes to .execute
+// resolved fix filter logic in filterFAQ
 
 // base class for filter logic
 class Filter {
