@@ -169,6 +169,10 @@ class SemiStrict extends Filter {
     }
 }
 
+export { Strict, SemiStrict, Partial }
+
+////////////////////////////// ignore everything below this point ///////////
+
 class Partial extends Filter {
     constructor(SettingsObject = new Defaults) {
         super(SettingsObject);
@@ -244,5 +248,3 @@ msg2.forEach( (faqKeyword, i) => {
 
 return match;
 }
-
-export { Strict, SemiStrict, Partial }

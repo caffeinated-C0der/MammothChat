@@ -98,14 +98,16 @@ Object.entries(FaqController.filters).forEach( (nameBoolArr, i, arr) => {
     const testIndex = 0; // consistancy within random
     
     // if (i != anyIndex(arr.length -1)) return; // just to test 1 for now
-    if (i != 0) return; // just to test 1 for now
 
     FaqController.resetFilters(false);
     FaqController[`${nameBoolArr[0]}`] = true;
 
     if (!bulk) FaqController.test ([userMessages[testIndex]]); // test single
     else FaqController.test (userMessages); // test bulk
+
 });
+
+FaqController.log;
 
 console.log(``);
 console.log(`========================= END =========================`);

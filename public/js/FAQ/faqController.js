@@ -43,7 +43,7 @@ import { Defaults } from './faqLib/Defaults.js';
             });
     
             this.report('Ending controller test.');
-            return this.log;
+            return this._log;
         }
     
         execute (msg = '') {

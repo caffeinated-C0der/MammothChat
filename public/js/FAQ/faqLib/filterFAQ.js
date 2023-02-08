@@ -152,7 +152,7 @@ const removeFalsePositives = function(strArr = [''], keywordsToRemove = ['']) {
 
 export { filterFAQ, replaceByArray, replacePunctuationByArray, removeFalsePositives }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////// ignore everything below this point ///////////////////////////////////////////////
 
 // note might need to refactor subfunctions of filter due to duplicated code
 // same input and several steps identical

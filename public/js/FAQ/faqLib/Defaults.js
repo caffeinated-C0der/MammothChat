@@ -41,7 +41,7 @@ class Settings { // base
         // this.log;
         // return testArr;
 
-        return this.log;
+        return this._log;
     }
 }
 
@@ -103,8 +103,8 @@ class Defaults extends Settings {
         // this.report('Retrieving copy of *filters* as a frozen object.'); // spam
         return Object.freeze({
             filterStrict           : this._filterStrict, 
-            filterSemiStrict       : this._filterSemiStrict, 
-            filterParial           : this._filterParial,
+            filterSemiStrict       : this._filterSemiStrict
+            // filterParial           : this._filterParial,
         });
     }
 
@@ -228,6 +228,7 @@ class Defaults extends Settings {
 
 export { Defaults, Settings }
 
+///////////////////// ignore everything below this point //////////////////
 
 // // this is the controller for FAQ settings // abstracted into its own module
 //     // to use this controller you just have to run execute
