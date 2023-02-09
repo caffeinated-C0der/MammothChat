@@ -1,17 +1,10 @@
 import { filterFAQ, replacePunctuationByArray, removeFalsePositives } from './filterFAQ.js'
-// import { Controller } from '../faqController.js';
 import { Defaults } from './Defaults.js';
 
 // called by faqController
 const outputFAQ = function ( userTxt = ``, defaults = new Defaults() ) {
-    // resolved let functions pull their data from the defaults Object instead of this function using settings
-    // resolved make all these settings variables obsolete 
-
     // destructuring dependancies
     const { wordsToIgnore, punctuationToReplace, FAQ } = defaults;  
-    defaults.report('Retrieving wordsToIgnore.');
-    defaults.report('Retrieving punctuationToReplace.')
-    defaults.report('Retrieving FAQ.')
 
     let text = userTxt.slice(0); // make a copy
 
@@ -22,7 +15,6 @@ const outputFAQ = function ( userTxt = ``, defaults = new Defaults() ) {
         defaults.report('Retrieving punctuationReplaceChar.')
         text = replacePunctuationByArray(text, defaults); 
     }
-    
 
     if (!Array.isArray(text)) text = text.split(' '); // makes string an array
 
@@ -32,8 +24,6 @@ const outputFAQ = function ( userTxt = ``, defaults = new Defaults() ) {
         text = removeFalsePositives(text, wordsToIgnore);
     }; 
 
-    // defaults.report('REPORTING FOR DUTY CAPTAIN!');
-    
     // get index for filtering the FAQ // array of indexes
     // indexes already in set which means there shouldn't be any futher duplicatation
     defaults.report('Pushing Settings down into filterFAQ.')
@@ -41,6 +31,7 @@ const outputFAQ = function ( userTxt = ``, defaults = new Defaults() ) {
     const filteredFAQ = []; // output
 
     
+    defaults.report('Retrieving FAQ.');
     // set is similar to an array except it cant hold duplicates and is an object not array
     if (indexArray.length > 0) indexArray.forEach(index => filteredFAQ.push( FAQ[index] ));
     else return ''; // early exit
@@ -62,7 +53,14 @@ export { outputFAQ };
     // resolved match indexes contains all indexes instead of those based on keywords
     // resolved-sortoff use class based filter logic
     // resolved fixed strict and non strict consecutive
-
+    // resolved let functions pull their data from the defaults Object instead of this function using settings
+    // resolved make all these settings variables obsolete 
+    // resolved settings are carrying over correctly
+    // resolved fixed replaceAll
+    // resolved punctuation not removed
+    // resolved defaults not destructured correctly to new class names
+    // resolved storing all indexes instead of relevant ones
+    // resolved import new filters and execute their logic
 
     // todo generic regex filter logic
     // todo update existing filters to use regex

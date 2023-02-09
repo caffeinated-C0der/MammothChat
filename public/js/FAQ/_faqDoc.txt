@@ -1,1 +1,23 @@
 This is the documentation for the FAQ Controller, subfunctions and functionality.
+
+To use the FAQ filter functionality you will have to instanciate a Controller from FaqController.js
+The controller will act as the base for the functionality of the FAQ system.
+
+The controller is an extention of the Defaults Settings class which means it will provide you access
+to all the settings available to the Controller.
+
+The controller has 2 main methods which are test() and execute().
+execute() runs the controller with all it's current settings while the test() method will run
+the execute with an try-catch and display additional commentary useful for debugging.
+
+The controller inherits various properties from the Defaults class which you can access and modify
+to alter the output of the FAQ function.
+
+// todo continue 
+wordsToIgnore
+punctuationToReplace
+punctuationReplaceChar
+filterStrict
+filterSemiStrict
+consecutiveCount
+FAQ

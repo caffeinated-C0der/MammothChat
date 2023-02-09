@@ -6,21 +6,18 @@ const blacklistKeywords = [
 const punctuationArr = [ 
 '!', '"', '#', '$', '%', '&', "'", '(', ')', '*', '+', ',', 
 '-', '.', '/', ':', ';', '?', '@', '[', ']', '^', '_', 
-'{', '|', '}', '~', '`']; // does not include backtilt and backslash as those don't like being in strings
+'{', '|', '}', '~', '`', '\\'];
 // might need to try using other methods to include those into strings for comparison
-
-// import { blacklistKeywords, punctuationArr } from "./config.js"; 
 
 class Settings { // base 
     _log = [];
-    constructor() {
-        
-    }
+    _reportStartPaddingAmount = 0; // modify this manually im not going to bother right now
+    constructor() {  }
 
     get log () {
         this.report('Printing log to console');
         console.log(`--- Status Report ---`);
-        this._log.forEach((status, i) => console.log('  ', `${`${i}`.padStart(3, 0)}: ${status}`));
+        this._log.forEach((status, i) => console.log(`${'  '.repeat(this._reportStartPaddingAmount)}${`${i}`.padStart(3, 0)}: ${status}`));
         console.log(`---  Status End  ---`);
         // return this._log.join('\n');
         return this._log;
@@ -38,10 +35,8 @@ class Settings { // base
     test (testArr = []) {
         this.report('Base class test');
         testArr.forEach(el => this.execute(el));
-        // this.log;
-        // return testArr;
 
-        return this.log;
+        return this._log;
     }
 }
 
@@ -64,24 +59,6 @@ class Defaults extends Settings {
     // in the event that more settings would be added if you get undefined just add the property to this settings sub class
     constructor() { 
         super();
-        // this._settings = {
-        //     wordsToIgnore          : this._wordsToIgnore, 
-        //     punctuationToReplace   : this._punctuationToReplace, 
-        //     punctuationReplaceChar : this._punctuationReplaceChar, 
-        //     filterStrict           : this._filterStrict, 
-        //     filterSemiStrict       : this._filterSemiStrict, 
-        //     filterParial           : this._filterParial, 
-        //     consecutiveCount       : this._consecutiveCount,
-        //     FAQ                    : this._FAQ
-        //  };
-        // this.report('Defaults settings object instantiated');
-
-        // this._filters = {
-        //     filterStrict           : this._filterStrict, 
-        //     filterSemiStrict       : this._filterSemiStrict, 
-        //     filterParial           : this._filterParial,
-        // }
-        // this.report('Defaults filters object instantiated');
     }
 
     // note settings and filters are read-only
@@ -103,8 +80,8 @@ class Defaults extends Settings {
         // this.report('Retrieving copy of *filters* as a frozen object.'); // spam
         return Object.freeze({
             filterStrict           : this._filterStrict, 
-            filterSemiStrict       : this._filterSemiStrict, 
-            filterParial           : this._filterParial,
+            filterSemiStrict       : this._filterSemiStrict
+            // filterParial           : this._filterParial, // redacted
         });
     }
 
@@ -112,7 +89,7 @@ class Defaults extends Settings {
         return this;
     }
 
-    // set addSetting (item) { // cant do this unless variables stored in a map
+    // set addSetting (item) { // cant do this unless variables stored in a map or sub object
     //     this.settings.push(item); // consider
     // }
 
@@ -127,6 +104,20 @@ class Defaults extends Settings {
     set punctuationToReplace (arr = [...punctuationArr]) {
         this.report(`punctuationToReplace CHANGED*.`);
         return this._punctuationToReplace = arr;
+    }
+
+    appendWordsToIgnore (...stuff) {
+        this.report(`Appending to wordsToIgnore. [${stuff}]`);
+        // this.wordsToIgnore = this.wordsToIgnore.concat(...stuff); 
+        this.wordsToIgnore = [...this._wordsToIgnore, ...stuff];
+        return this._wordsToIgnore;
+    } 
+
+    appendPunctuationToReplace (...stuff) {
+        this.report(`Appending to punctuationToReplace. [${stuff}]`);
+        // this.punctuationToReplace = this.punctuationToReplace.concat(...stuff); 
+        this.punctuationToReplace = [...this._punctuationToReplace, ...stuff];
+        return this._punctuationToReplace; 
     }
 
     set punctuationReplaceChar (str = '') {
@@ -203,11 +194,11 @@ class Defaults extends Settings {
         return [ ...new Set( this._FAQ ) ]; // global elimination of duplicates on FAQ
     }
 
-    resetFilters (bool = false) { // no cheat have to do long
+    resetFilters (bool = false) {
         this.report(`Reseting Filters *${bool}.`)
         this.filterStrict = bool;
         this.filterSemiStrict = bool;
-        this.filterParial = bool;
+        // this.filterParial = bool;
     }
 
     toggleFilterStrict () {
@@ -220,62 +211,10 @@ class Defaults extends Settings {
         this.filterSemiStrict = !this.filterSemiStrict;
     }
 
-    toggleFilterParial () { 
-        this.report(`Toggle "FilterParial" *(${this.filterParial} ->> ${!this.filterParial}).`);
-        this.filterParial = !this.filterParial;
-    }
+    // toggleFilterParial () { 
+    //     this.report(`Toggle "FilterParial" *(${this.filterParial} ->> ${!this.filterParial}).`);
+    //     this.filterParial = !this.filterParial;
+    // }
 }
 
 export { Defaults, Settings }
-
-
-// // this is the controller for FAQ settings // abstracted into its own module
-//     // to use this controller you just have to run execute
-//     // constructor will ensure that you have the FAQ
-//         // it also ensures that you don't have to define FAQ everytime you call executable
-//     // the execute runs on the user message
-//     // you can change any of the settings through their base set methods
-//     // by not changing the variables their assumed defaults will be used
-// class Controller extends Defaults { // base for controller
-//     _FAQ;
-//     constructor (faqArr = ['']) {
-//         super();
-//         this._FAQ = faqArr;
-//         if ( !Array.isArray(this.FAQ) ) {
-//             this.report('Failed to instanciate Controller due to FAQ input incorrect type');
-//             throw new Error(`Failed to initialize FAQ, -${FAQ}-. In order for the controller to function it requires an array of FAQ. Questions and their respective Answer should be a single combined entry within the array. ex ['Q... A...', 'Q... A...'] `);
-//         }
-//     }
-
-//     set FAQ (arr = ['']) { return this._FAQ = arr }
-//     get FAQ () { return this._FAQ }
-
-//     test (msgArr = ['']) {
-//         // console.log(`FAQ.length > 0 in controller test`, this.FAQ.length > 0); // this is not the problem
-
-//         msgArr.forEach ((msg, i) => {
-//             console.log(`- testing case #`, i +1, '-');
-//             console.log(`Input:`);
-//             console.log(msg);
-//             try { // just to catch unforseen errors
-//                 const result = this.execute(msg);
-//                 console.log(`Result:`);
-//                 console.log(result);
-//             } catch (error) {
-//                 this.report('FAQ test Failed')
-//                 console.warn(`------ FAQ failed ------`);
-//                 console.error(error);
-//                 console.log(`------ * ------`);
-//             } 
-//             console.log(`-- end case #`, i +1, '--');
-//             console.log(``);
-//         });
-
-//         return this.log;
-//     }
-
-//     execute (msg = '') {
-//         console.log(`FAQ.length > 0 in controller execute`, this.FAQ.length > 0); // this is not the problem
-//         return outputFAQ(msg, this.settings); 
-//     }
-// }

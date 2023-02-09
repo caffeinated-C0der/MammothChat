@@ -21,7 +21,6 @@ import { Defaults } from './faqLib/Defaults.js';
         }
     
         test (msgArr = ['']) {
-            // console.log(`FAQ.length > 0 in controller test`, this.FAQ.length > 0); // this is not the problem
             this.report('Running controller test.');
     
             msgArr.forEach ((msg, i) => {
@@ -43,17 +42,15 @@ import { Defaults } from './faqLib/Defaults.js';
             });
     
             this.report('Ending controller test.');
-            return this.log;
+            return this._log;
         }
     
         execute (msg = '') {
-            // console.log(`   * controller filter settings *\n`, Object.entries(this.filters));
-            // console.log(``);
-
             this.report('Running controller execute.');
-            // note this.settings does not include the functions just a frozen copy of the variables
-            // const result = outputFAQ(msg, this.settings); 
+            // this.settings does not include the functions just a frozen copy of the variables
             // me is the controller and not just limited to the frozen settings obj
+            // created me because there was issues with trying to use this
+            // those problems are probably resolved by now...
             const result = outputFAQ(msg, this.me); 
             this.report('Ending controller execute.');
             return result;
