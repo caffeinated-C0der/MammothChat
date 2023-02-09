@@ -13,6 +13,7 @@ the execute with an try-catch and display additional commentary useful for debug
 The controller inherits various properties from the Defaults class which you can access and modify
 to alter the output of the FAQ function.
 
+// todo continue 
 wordsToIgnore
 punctuationToReplace
 punctuationReplaceChar
